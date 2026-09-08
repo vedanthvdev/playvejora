@@ -23,6 +23,10 @@ npm version minor --no-git-tag-version
 
 Commit that in a normal branch and the next merge continues patching from there.
 
+## Design
+
+Visual language lives in [`docs/design/playvejora-design-system.md`](docs/design/playvejora-design-system.md). Colour, type, spacing, layout, motion, and mobile composition should be taken from that document and from the CSS tokens in `app/globals.css`. Do not introduce a new reusable colour, type role, or spacing value until it exists in both places.
+
 ## Notes
 
 SQLite is created at `data/playvejora.sqlite`. Host this app on a Node server with a persistent disk (`npm run build` then `npm start`). Do not use a diskless serverless platform for this database.

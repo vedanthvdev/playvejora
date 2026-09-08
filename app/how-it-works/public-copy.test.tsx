@@ -9,6 +9,10 @@ describe("public copy", () => {
     expect(blob).toMatch(/Payment is not collected/i);
   });
 
+  it("splits the two-tone wordmark without altering the product name", () => {
+    expect(site.wordmark.lead + site.wordmark.accent).toBe(site.name);
+  });
+
   it("keeps the live league in Edinburgh without a fake venue or city picker", () => {
     expect(home.kicker).toMatch(/Edinburgh/);
     expect(venue.cityLine).toMatch(/Edinburgh/);

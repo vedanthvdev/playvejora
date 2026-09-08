@@ -4,33 +4,40 @@ import { home } from "@/lib/site-copy";
 export default function HomePage() {
   return (
     <>
-      <section className="hero">
-        <span className="kicker">{home.kicker}</span>
-        <h1>{home.title}</h1>
-        <p>{home.lede}</p>
-        <div className="hero-actions">
-          <Link className="btn btn-primary" href="/register">
-            {home.cta}
-          </Link>
-          <Link className="btn btn-ghost" href="/how-it-works">
-            {home.secondaryCta}
-          </Link>
+      <section className="hero bleed">
+        <div className="wrap hero-inner">
+          <span className="kicker">{home.kicker}</span>
+          <h1>{home.title}</h1>
+          <p>{home.lede}</p>
+          <div className="hero-actions">
+            <Link className="btn btn-primary" href="/register">
+              {home.cta}
+            </Link>
+            <Link className="btn btn-ghost" href="/how-it-works">
+              {home.secondaryCta}
+            </Link>
+          </div>
         </div>
       </section>
 
-      <dl className="stats">
-        {home.stats.map((stat) => (
-          <div key={stat.term}>
-            <dt>{stat.term}</dt>
-            <dd>{stat.detail}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="stats-band bleed">
+        <dl className="wrap stats">
+          {home.stats.map((stat) => (
+            <div key={stat.term}>
+              <dt>{stat.term}</dt>
+              <dd>{stat.detail}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
-      <section className="section">
+      <section className="wrap section">
         <div className="section-head">
           <h2>How a team gets in</h2>
-          <p>No accounts, no squad-size rules yet, and nothing to settle on this site.</p>
+          <p>
+            No accounts, no squad-size rules yet, and nothing to settle on this
+            site.
+          </p>
         </div>
         <div className="cards">
           {home.steps.map((step, index) => (
@@ -43,12 +50,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="band">
-        <h2>{home.closing.title}</h2>
-        <p>{home.closing.body}</p>
-        <Link className="btn btn-primary" href="/register">
-          {home.cta}
-        </Link>
+      <section className="band bleed">
+        <div className="wrap band-inner">
+          <h2>{home.closing.title}</h2>
+          <p>{home.closing.body}</p>
+          <Link className="btn btn-primary" href="/register">
+            {home.cta}
+          </Link>
+        </div>
       </section>
     </>
   );

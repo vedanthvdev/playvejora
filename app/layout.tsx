@@ -10,6 +10,11 @@ export const metadata: Metadata = {
     "PlayVejora is a company-first after-work football league in Edinburgh. A captain registers the whole team.",
 };
 
+const registerLink = site.nav.find((item) => item.href === "/register") ?? {
+  href: "/register",
+  label: "Register",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,26 +24,34 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <header className="site-header">
-          <Link className="wordmark" href="/">
-            <span className="dot" aria-hidden="true" />
-            {site.name}
-          </Link>
-          <nav className="nav">
-            {site.nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={item.href === "/register" ? "nav-cta" : undefined}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="wrap header-inner">
+            <Link className="wordmark" href="/">
+              <span className="dot" aria-hidden="true" />
+              <span>
+                <span className="wordmark-lead">{site.wordmark.lead}</span>
+                <span className="wordmark-accent">{site.wordmark.accent}</span>
+              </span>
+            </Link>
+            <nav className="nav" aria-label="Primary">
+              {site.nav
+                .filter((item) => item.href !== registerLink.href)
+                .map((item) => (
+                  <Link key={item.href} href={item.href}>
+                    {item.label}
+                  </Link>
+                ))}
+            </nav>
+            <Link className="nav-cta" href={registerLink.href}>
+              {registerLink.label}
+            </Link>
+          </div>
         </header>
         <main className="main">{children}</main>
         <footer className="site-footer">
-          <span>{footer.note}</span>
-          <span>{site.tagline}</span>
+          <div className="wrap footer-inner">
+            <span>{footer.note}</span>
+            <span>{site.tagline}</span>
+          </div>
         </footer>
       </body>
     </html>
