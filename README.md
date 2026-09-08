@@ -21,7 +21,9 @@ There is no password-reset page. Change the live password with `npx wrangler sec
 
 SQL that touches team data uses bound parameters (`?` plus `.bind`), so a team name or email cannot change the query. Do not concatenate user text into SQL.
 
-A completed registration emails `playvejora@gmail.com` when `RESEND_API_KEY` is set (`npx wrangler secret put RESEND_API_KEY`). Signup still stores the team if the key is missing or Resend is down. Verify a sending domain on Resend before changing `MAIL_FROM`; until then the default From address is Resend's onboarding sender.
+A completed registration emails `playvejora@gmail.com` and the captain when `RESEND_API_KEY` is set (`npx wrangler secret put RESEND_API_KEY`). Both messages include the public team reference (`tm_…`). Signup still stores the team if the key is missing or Resend is down. Verify a sending domain on Resend before changing `MAIL_FROM`; until then the default From address is Resend's onboarding sender.
+
+Each registration belongs to a competition (city + sport + season) with its own league cap. Season one is Edinburgh football. Organizers can filter `/admin` by city, sport, and in-league vs waitlist. Payment is not collected yet; the schema already has Stripe columns and a `league_paid_waitlist_free` mode for when league places should require payment while the waitlist stays free.
 
 ## Versioning
 

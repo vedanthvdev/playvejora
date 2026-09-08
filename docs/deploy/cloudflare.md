@@ -33,7 +33,7 @@ npm run deploy
 
 The live Worker is `https://playvejora.playvejora.workers.dev`. Confirm a release with `/version.info`, which returns the name and version from `package.json` with no caching.
 
-The D1 database ID is already in `wrangler.jsonc`. Later deploys are `npm run deploy`. Schema changes still need `npm run cf:migrate` before the code that uses them ships.
+Schema changes still need `npm run cf:migrate` before the code that uses them ships. Migration `0003` adds competitions and public team ids.
 
 ## Domain
 
