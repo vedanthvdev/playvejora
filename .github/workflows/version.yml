@@ -1,0 +1,31 @@
+name: version
+
+# Every merge into master bumps the patch digit of X.Y.Z and tags it.
+# Bump X or Y by hand (npm version minor --no-git-tag-version) in a normal
+# branch; this job only ever touches Z.
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Bump patch version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          npm version patch -m "chore(release): v%s"
+          git push --follow-tags origin HEAD:master
