@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "playvejora",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "workers_dev": true,
+  "vars": {
+    "SITE_URL": "https://playvejora.playvejora.workers.dev"
+  },
+  // database_id from `wrangler d1 create playvejora`. Local development
+  // ignores it and keeps its own copy under .wrangler/state.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "playvejora",
+      "database_id": "aa74fb2c-1aff-43b0-8ecb-fb0102cef30d",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

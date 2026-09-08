@@ -1,21 +1,11 @@
-import fs from "node:fs";
-import path from "node:path";
+import pkg from "../package.json";
 
-type PackageJson = {
-  name: string;
-  version: string;
-};
-
-function readPackage(): PackageJson {
-  const raw = fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8");
-  return JSON.parse(raw) as PackageJson;
-}
-
+// Imported rather than read from disk so the value survives bundling into a
+// Worker, where there is no filesystem to read package.json from.
 export function appVersion(): string {
-  return readPackage().version;
+  return pkg.version;
 }
 
 export function versionInfoBody(): string {
-  const pkg = readPackage();
   return `${pkg.name} ${pkg.version}\n`;
 }

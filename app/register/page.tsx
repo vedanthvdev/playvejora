@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import fs from "node:fs";
-import path from "node:path";
+import { waiverText } from "@/content/waiver";
 import { RegisterWizard } from "./RegisterWizard";
 
 export const metadata: Metadata = {
@@ -11,11 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  const waiverText = fs.readFileSync(
-    path.join(process.cwd(), "content", "waiver.md"),
-    "utf8",
-  );
-
   return (
     <div className="wrap page-top">
       <div className="page-head">

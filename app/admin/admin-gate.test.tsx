@@ -1,6 +1,3 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   PRE_LAUNCH_PASSWORD,
@@ -9,25 +6,26 @@ import {
   sessionToken,
 } from "@/lib/admin-auth";
 import { teamsForAdmin } from "@/lib/admin-data";
-import { closeDb, submitTeam } from "@/lib/registration";
+import { useDatabase } from "@/lib/db";
+import { createTestDatabase } from "@/lib/test-db";
+import { submitTeam } from "@/lib/registration";
 
 describe("admin gate", () => {
-  let dir: string;
+  let db: ReturnType<typeof createTestDatabase>;
 
   beforeEach(() => {
-    dir = fs.mkdtempSync(path.join(os.tmpdir(), "playvejora-admin-"));
-    process.env.PLAYVEJORA_DB_PATH = path.join(dir, "test.sqlite");
+    db = createTestDatabase();
+    useDatabase(db);
     process.env.ADMIN_PASSWORD = "secret-pass";
   });
 
   afterEach(() => {
-    closeDb();
-    delete process.env.PLAYVEJORA_DB_PATH;
+    useDatabase(null);
+    db.close();
     delete process.env.ADMIN_PASSWORD;
-    fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  it("lists fifth and sixth teams with in-league then waitlist after a valid session", () => {
+  it("lists fifth and sixth teams with in-league then waitlist after a valid session", async () => {
     const base = {
       company: "Acme",
       friendsOrMixed: false,
@@ -36,9 +34,9 @@ describe("admin gate", () => {
       waiverAccepted: true,
     };
     for (let i = 1; i <= 6; i += 1) {
-      submitTeam({ ...base, teamName: `Team ${i}` });
+      await submitTeam({ ...base, teamName: `Team ${i}` });
     }
-    const teams = teamsForAdmin(sessionToken());
+    const teams = await teamsForAdmin(sessionToken());
     expect(teams).not.toBeNull();
     expect(teams!.map((row) => row.status)).toEqual([
       "in_league",
@@ -51,8 +49,8 @@ describe("admin gate", () => {
     expect(teams![0].captainEmail).toBe("cap@example.com");
   });
 
-  it("rejects the wrong password and hides teams without a session", () => {
-    submitTeam({
+  it("rejects the wrong password and hides teams without a session", async () => {
+    await submitTeam({
       teamName: "Hidden FC",
       company: "Acme",
       friendsOrMixed: false,
@@ -62,8 +60,8 @@ describe("admin gate", () => {
     });
     expect(passwordMatches("nope")).toBe(false);
     expect(isValidSession("forged")).toBe(false);
-    expect(teamsForAdmin(undefined)).toBeNull();
-    expect(teamsForAdmin("forged")).toBeNull();
+    expect(await teamsForAdmin(undefined)).toBeNull();
+    expect(await teamsForAdmin("forged")).toBeNull();
   });
 });
 
