@@ -20,6 +20,7 @@ export function RegisterWizard({ waiverText }: Props) {
   const [waiverAccepted, setWaiverAccepted] = useState(false);
   const [error, setError] = useState("");
   const [outcome, setOutcome] = useState<"in_league" | "waitlist" | null>(null);
+  const [publicId, setPublicId] = useState("");
   const [busy, setBusy] = useState(false);
 
   const namedPlayers = useMemo(
@@ -44,6 +45,7 @@ export function RegisterWizard({ waiverText }: Props) {
       return;
     }
     setOutcome(result.status);
+    setPublicId(result.publicId);
     setStep(3);
   }
 
@@ -226,7 +228,7 @@ export function RegisterWizard({ waiverText }: Props) {
             <h2>{teamName} has a place in season one.</h2>
             <p>
               Organizers will email {captainEmail} with the venue, the format, and
-              your fixtures.
+              your fixtures. Your reference is {publicId}.
             </p>
           </div>
         ) : null}
@@ -237,7 +239,7 @@ export function RegisterWizard({ waiverText }: Props) {
             <h2>{teamName} is in line for the next opening.</h2>
             <p>
               The five league places are taken. Organizers will email{" "}
-              {captainEmail} if a place frees up.
+              {captainEmail} if a place frees up. Your reference is {publicId}.
             </p>
           </div>
         ) : null}

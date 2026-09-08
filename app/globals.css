@@ -914,6 +914,23 @@ textarea {
   resize: vertical;
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: end;
+  margin-bottom: var(--space-6);
+}
+
+.filter-bar label {
+  min-width: 10rem;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
 .summary-row {
   display: flex;
   flex-wrap: wrap;

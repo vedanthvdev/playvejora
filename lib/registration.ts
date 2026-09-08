@@ -1,6 +1,9 @@
+import { liveCompetition } from "@/lib/competitions";
 import { getDatabase } from "@/lib/db";
+import { newPublicId } from "@/lib/ids";
 
 export type TeamStatus = "in_league" | "waitlist";
+export type PaymentStatus = "not_required" | "pending" | "paid" | "failed";
 
 export type TeamInput = {
   teamName: string;
@@ -13,6 +16,7 @@ export type TeamInput = {
 
 export type TeamRecord = {
   id: number;
+  publicId: string;
   teamName: string;
   company: string;
   friendsOrMixed: boolean;
@@ -21,7 +25,17 @@ export type TeamRecord = {
   waiverAcceptedAt: string;
   status: TeamStatus;
   city: string;
+  sport: string;
+  season: string;
+  competitionId: number;
+  paymentStatus: PaymentStatus;
   createdAt: string;
+};
+
+export type TeamListFilter = {
+  city?: string;
+  sport?: string;
+  status?: TeamStatus | "";
 };
 
 export type TeamUpdate = {
@@ -36,11 +50,12 @@ export type TeamUpdate = {
 export type UpdateResult = { ok: true } | { ok: false; error: string };
 
 export type SubmitResult =
-  | { ok: true; status: TeamStatus }
+  | { ok: true; status: TeamStatus; publicId: string }
   | { ok: false; error: string };
 
 type TeamRow = {
   id: number;
+  public_id: string;
   team_name: string;
   company: string;
   friends_or_mixed: number;
@@ -49,34 +64,47 @@ type TeamRow = {
   waiver_accepted_at: string;
   status: TeamStatus;
   city: string;
+  sport: string;
+  season: string;
+  competition_id: number;
+  payment_status: PaymentStatus;
   created_at: string;
 };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CITY = "edinburgh";
-const LEAGUE_CAP = 5;
+
+const TEAM_SELECT = `
+  SELECT
+    teams.*,
+    competitions.sport AS sport,
+    competitions.season AS season
+  FROM teams
+  INNER JOIN competitions ON competitions.id = teams.competition_id
+`;
 
 // The league place is decided inside the insert because D1 has no interactive
 // transactions, and a read-then-write would let two captains take the last place.
 const INSERT_TEAM = `
   INSERT INTO teams (
     team_name, company, friends_or_mixed, captain_email, player_names,
-    waiver_accepted_at, status, city, created_at
+    waiver_accepted_at, status, city, created_at, public_id, competition_id,
+    payment_status
   ) VALUES (
     ?, ?, ?, ?, ?, ?,
     CASE
-      WHEN (SELECT COUNT(*) FROM teams WHERE city = ? AND status = 'in_league') < ?
+      WHEN (SELECT COUNT(*) FROM teams WHERE competition_id = ? AND status = 'in_league') < ?
       THEN 'in_league'
       ELSE 'waitlist'
     END,
-    ?, ?
+    ?, ?, ?, ?, 'not_required'
   )
-  RETURNING status
+  RETURNING status, public_id
 `;
 
 function mapRow(row: TeamRow): TeamRecord {
   return {
     id: row.id,
+    publicId: row.public_id,
     teamName: row.team_name,
     company: row.company,
     friendsOrMixed: Boolean(row.friends_or_mixed),
@@ -85,6 +113,10 @@ function mapRow(row: TeamRow): TeamRecord {
     waiverAcceptedAt: row.waiver_accepted_at,
     status: row.status,
     city: row.city,
+    sport: row.sport,
+    season: row.season,
+    competitionId: row.competition_id,
+    paymentStatus: row.payment_status,
     createdAt: row.created_at,
   };
 }
@@ -123,8 +155,10 @@ export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
     return { ok: false, error: "The captain must accept the waiver for the team." };
   }
 
+  const competition = await liveCompetition();
   const db = await getDatabase();
   const now = new Date().toISOString();
+  const publicId = newPublicId("tm");
   const row = await db
     .prepare(INSERT_TEAM)
     .bind(
@@ -134,23 +168,43 @@ export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
       fields.email,
       JSON.stringify(fields.players),
       now,
-      CITY,
-      LEAGUE_CAP,
-      CITY,
+      competition.id,
+      competition.leagueCap,
+      competition.city,
       now,
+      publicId,
+      competition.id,
     )
-    .first<{ status: TeamStatus }>();
+    .first<{ status: TeamStatus; public_id: string }>();
 
   if (!row) {
     return { ok: false, error: "The registration could not be saved. Try again." };
   }
-  return { ok: true, status: row.status };
+  return { ok: true, status: row.status, publicId: row.public_id };
 }
 
-export async function listTeams(): Promise<TeamRecord[]> {
+export async function listTeams(filter: TeamListFilter = {}): Promise<TeamRecord[]> {
   const db = await getDatabase();
+  const clauses: string[] = [];
+  const values: unknown[] = [];
+  if (filter.city) {
+    clauses.push("competitions.city = ?");
+    values.push(filter.city);
+  }
+  if (filter.sport) {
+    clauses.push("competitions.sport = ?");
+    values.push(filter.sport);
+  }
+  if (filter.status === "in_league" || filter.status === "waitlist") {
+    clauses.push("teams.status = ?");
+    values.push(filter.status);
+  }
+  const where = clauses.length ? ` WHERE ${clauses.join(" AND ")}` : "";
   const { results } = await db
-    .prepare(`SELECT * FROM teams ORDER BY created_at ASC, id ASC`)
+    .prepare(
+      `${TEAM_SELECT}${where} ORDER BY teams.created_at ASC, teams.id ASC`,
+    )
+    .bind(...values)
     .all<TeamRow>();
   return results.map(mapRow);
 }
@@ -158,7 +212,7 @@ export async function listTeams(): Promise<TeamRecord[]> {
 export async function getTeam(id: number): Promise<TeamRecord | null> {
   const db = await getDatabase();
   const row = await db
-    .prepare(`SELECT * FROM teams WHERE id = ?`)
+    .prepare(`${TEAM_SELECT} WHERE teams.id = ?`)
     .bind(id)
     .first<TeamRow>();
   return row ? mapRow(row) : null;

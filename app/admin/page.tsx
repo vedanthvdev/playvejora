@@ -3,14 +3,34 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ADMIN_COOKIE } from "@/lib/admin-auth";
 import { teamsForAdmin } from "@/lib/admin-data";
+import { listCompetitions } from "@/lib/competitions";
+import type { TeamStatus } from "@/lib/registration";
 
-export default async function AdminPage() {
+function unique(values: string[]): string[] {
+  return [...new Set(values)];
+}
+
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ city?: string; sport?: string; status?: string }>;
+}) {
   const token = (await cookies()).get(ADMIN_COOKIE)?.value;
-  const teams = await teamsForAdmin(token);
+  const params = await searchParams;
+  const city = params.city?.trim() ?? "";
+  const sport = params.sport?.trim() ?? "";
+  const status =
+    params.status === "in_league" || params.status === "waitlist"
+      ? (params.status as TeamStatus)
+      : "";
+  const teams = await teamsForAdmin(token, { city, sport, status });
   if (!teams) {
     redirect("/admin/login");
   }
 
+  const competitions = await listCompetitions();
+  const cities = unique(competitions.map((row) => row.city));
+  const sports = unique(competitions.map((row) => row.sport));
   const inLeague = teams.filter((team) => team.status === "in_league").length;
   const waitlisted = teams.length - inLeague;
 
@@ -19,24 +39,63 @@ export default async function AdminPage() {
       <div className="page-head">
         <span className="kicker">Organizers only</span>
         <h1>Team intake</h1>
-        <p>Every registration for the Edinburgh season, newest last.</p>
+        <p>Every registration for the live competitions, newest last.</p>
       </div>
 
+      <form className="filter-bar" method="get">
+        <label htmlFor="city">
+          City
+          <select id="city" name="city" defaultValue={city}>
+            <option value="">All cities</option>
+            {cities.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label htmlFor="sport">
+          Sport
+          <select id="sport" name="sport" defaultValue={sport}>
+            <option value="">All sports</option>
+            {sports.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label htmlFor="status">
+          Place
+          <select id="status" name="status" defaultValue={status}>
+            <option value="">All places</option>
+            <option value="in_league">In league</option>
+            <option value="waitlist">Waitlist</option>
+          </select>
+        </label>
+        <button className="btn btn-solid" type="submit">
+          Filter
+        </button>
+      </form>
+
       <div className="summary-row">
-        <span className="chip">{inLeague} of 5 league places taken</span>
-        <span className="chip">{waitlisted} on the waitlist</span>
+        <span className="chip">{inLeague} of 5 league places in this view</span>
+        <span className="chip">{waitlisted} on the waitlist in this view</span>
       </div>
 
       {teams.length === 0 ? (
         <div className="table-wrap">
-          <p className="empty">No teams have registered yet.</p>
+          <p className="empty">No teams match this filter.</p>
         </div>
       ) : (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
+                <th>Ref</th>
                 <th>Team</th>
+                <th>City</th>
+                <th>Sport</th>
                 <th>Company</th>
                 <th>Captain</th>
                 <th>Players</th>
@@ -48,7 +107,10 @@ export default async function AdminPage() {
             <tbody>
               {teams.map((team) => (
                 <tr key={team.id}>
+                  <td className="mono">{team.publicId}</td>
                   <td className="strong">{team.teamName}</td>
+                  <td>{team.city}</td>
+                  <td>{team.sport}</td>
                   <td>
                     {team.company ||
                       (team.friendsOrMixed ? "Friends / mixed" : "—")}

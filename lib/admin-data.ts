@@ -4,6 +4,7 @@ import {
   getTeam,
   listTeams,
   updateTeam,
+  type TeamListFilter,
   type TeamRecord,
   type TeamUpdate,
   type UpdateResult,
@@ -15,11 +16,12 @@ export type AdminDeleteResult =
 
 export async function teamsForAdmin(
   token: string | undefined,
+  filter: TeamListFilter = {},
 ): Promise<TeamRecord[] | null> {
   if (!(await isValidSession(token))) {
     return null;
   }
-  return listTeams();
+  return listTeams(filter);
 }
 
 export async function teamForAdmin(

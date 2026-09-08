@@ -26,13 +26,13 @@ describe("submitTeam", () => {
     };
     for (let i = 1; i <= 4; i += 1) {
       const result = await submitTeam({ ...base, teamName: `Team ${i}` });
-      expect(result).toEqual({ ok: true, status: "in_league" });
+    expect(result).toMatchObject({ ok: true, status: "in_league" });
     }
-    expect(await submitTeam({ ...base, teamName: "Team 5" })).toEqual({
+    expect(await submitTeam({ ...base, teamName: "Team 5" })).toMatchObject({
       ok: true,
       status: "in_league",
     });
-    expect(await submitTeam({ ...base, teamName: "Team 6" })).toEqual({
+    expect(await submitTeam({ ...base, teamName: "Team 6" })).toMatchObject({
       ok: true,
       status: "waitlist",
     });
@@ -56,7 +56,7 @@ describe("submitTeam", () => {
       playerNames: ["Sam"],
       waiverAccepted: true,
     });
-    expect(result).toEqual({ ok: true, status: "in_league" });
+    expect(result).toMatchObject({ ok: true, status: "in_league" });
     const teams = await listTeams();
     expect(teams[0].company).toBe("");
     expect(teams[0].friendsOrMixed).toBe(true);
@@ -179,6 +179,47 @@ describe("submitTeam", () => {
       "in_league",
       "waitlist",
     ]);
+  });
+
+  it("assigns a public id and records city and sport from the live competition", async () => {
+    const result = await submitTeam({
+      teamName: "Pitch FC",
+      company: "Acme",
+      friendsOrMixed: false,
+      captainEmail: "cap@example.com",
+      playerNames: ["Alex"],
+      waiverAccepted: true,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+    expect(result.publicId).toMatch(/^tm_[0-9a-f]{16}$/);
+    const [team] = await listTeams();
+    expect(team.publicId).toBe(result.publicId);
+    expect(team.city).toBe("edinburgh");
+    expect(team.sport).toBe("football");
+    expect(team.paymentStatus).toBe("not_required");
+  });
+
+  it("filters the intake list by city, sport, and place", async () => {
+    await submitTeam({
+      teamName: "Pitch FC",
+      company: "Acme",
+      friendsOrMixed: false,
+      captainEmail: "cap@example.com",
+      playerNames: ["Alex"],
+      waiverAccepted: true,
+    });
+    expect((await listTeams({ city: "edinburgh", sport: "football" })).map((row) => row.teamName)).toEqual([
+      "Pitch FC",
+    ]);
+    expect(await listTeams({ city: "glasgow" })).toEqual([]);
+    expect(await listTeams({ sport: "netball" })).toEqual([]);
+    expect((await listTeams({ status: "in_league" })).map((row) => row.teamName)).toEqual([
+      "Pitch FC",
+    ]);
+    expect(await listTeams({ status: "waitlist" })).toEqual([]);
   });
 
   it("returns false when deleting a team that is not there", async () => {

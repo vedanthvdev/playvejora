@@ -34,14 +34,19 @@ describe("organizer notify on submit", () => {
       playerNames: ["Alex", "Sam"],
       waiverAccepted: true,
     });
-    expect(result).toEqual({ ok: true, status: "in_league" });
-    expect(sent).toHaveLength(1);
-    expect(sent[0].to).toBe("playvejora@gmail.com");
-    expect(sent[0].subject).toMatch(/Pitch FC/);
-    expect(sent[0].subject).toMatch(/in the league/i);
-    expect(sent[0].text).toMatch(/cap@example.com/);
-    expect(sent[0].text).toMatch(/Alex, Sam/);
-    expect(sent[0].text).toMatch(/Acme/);
+    expect(result).toMatchObject({ ok: true, status: "in_league" });
+    expect(sent).toHaveLength(2);
+    const toOrganizers = sent.find((message) => message.to === "playvejora@gmail.com");
+    const toCaptain = sent.find((message) => message.to === "cap@example.com");
+    expect(toOrganizers?.subject).toMatch(/Pitch FC/);
+    expect(toOrganizers?.subject).toMatch(/in the league/i);
+    expect(toOrganizers?.text).toMatch(/cap@example.com/);
+    expect(toOrganizers?.text).toMatch(/Alex, Sam/);
+    expect(toOrganizers?.text).toMatch(/Acme/);
+    expect(toOrganizers?.text).toMatch(/tm_[0-9a-f]{16}/);
+    expect(toCaptain?.subject).toMatch(/Pitch FC/);
+    expect(toCaptain?.text).toMatch(/Thanks for registering/);
+    expect(toCaptain?.text).toMatch(/reference is tm_/);
   });
 
   it("does not email when the registration is rejected", async () => {
@@ -69,9 +74,12 @@ describe("organizer notify on submit", () => {
       captainEmail: "late@example.com",
       playerNames: ["Alex"],
       status: "waitlist",
+      publicId: "tm_waitlist0000001",
     });
     expect(sent[0].subject).toMatch(/waitlist/i);
     expect(sent[0].text).toMatch(/friends \/ mixed/i);
+    expect(sent[1].to).toBe("late@example.com");
+    expect(sent[1].text).toMatch(/tm_waitlist0000001/);
   });
 
   it("does not fail the notify path when the mailer throws", async () => {
@@ -88,6 +96,7 @@ describe("organizer notify on submit", () => {
         captainEmail: "cap@example.com",
         playerNames: ["Alex"],
         status: "waitlist",
+        publicId: "tm_waitlist0000001",
       }),
     ).resolves.toBeUndefined();
   });
