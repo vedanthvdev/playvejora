@@ -25,6 +25,8 @@ Copy the printed `database_id` into `wrangler.jsonc`, replacing `REPLACE_WITH_D1
 ```bash
 npm run cf:migrate
 npx wrangler secret put ADMIN_PASSWORD
+# Optional until you want signup mail. Signup still works without it.
+npx wrangler secret put RESEND_API_KEY
 
 npm run deploy
 ```
@@ -65,6 +67,9 @@ Put `ADMIN_PASSWORD` in `.dev.vars` (copy `.dev.vars.example`). The Workers runt
 | Variable | Where | Purpose |
 | --- | --- | --- |
 | `ADMIN_PASSWORD` | `wrangler secret` / `.dev.vars` | Shared organizer login. Required. Rotate with `npx wrangler secret put ADMIN_PASSWORD`. There is no reset UI. |
+| `RESEND_API_KEY` | `wrangler secret` / `.dev.vars` | Optional. Sends the organizer an email after a complete registration. Signup still works if it is missing. |
+| `MAIL_FROM` | `wrangler secret` or `vars` / `.dev.vars` | Optional From header. Defaults to `PlayVejora <beth.t@example.com>` until a PlayVejora domain is verified on Resend. |
+| `ORGANIZER_EMAIL` | `vars` / `.dev.vars` | Optional inbox. Defaults to `playvejora@gmail.com`. |
 | `SITE_URL` | `vars` in `wrangler.jsonc` | Canonical URLs, Open Graph, sitemap. |
 | `DB` | `d1_databases` binding | The D1 database. |
 

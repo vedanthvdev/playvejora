@@ -1,3 +1,4 @@
 # Copy to .dev.vars for local Worker runs. The Workers runtime always reports
 # production, so the "playvejora-dev" fallback never applies there.
 ADMIN_PASSWORD=local-organizer
+# RESEND_API_KEY=

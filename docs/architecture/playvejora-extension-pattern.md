@@ -14,6 +14,7 @@ Do not reverse these v1 rules when extending: Edinburgh-only public UI, no parti
 - **City:** each row already has `city` defaulting to `edinburgh`. More cities should filter and cap by city. Per-city versus shared waitlist is still to decide.
 - **Admin:** reuse `teamsForAdmin` and the cookie in `lib/admin-auth.ts`. A login inserts a random token into `admin_sessions` and the cookie carries only that token, so sessions expire after twelve hours and logout ends them. Organizer pages use `AdminChrome`, not the public nav or Origin footer. Edits go through `updateTeam` with bound parameters. Deleting a registration asks for `ADMIN_PASSWORD` again and does not end other sessions. Do not list PII on unauthenticated routes.
 - **Abuse limits:** any new unauthenticated write or credential check should take a bucket through `consumeRateLimit` in `lib/rate-limit.ts` before it touches the database, keyed by `clientIp`. Policies live beside it rather than at the call site.
+- **Organizer email:** `submitTeamAndNotify` in `lib/notify.ts` sends after a successful insert. Tests inject a mailer with `useMailer`. Production uses Resend when `RESEND_API_KEY` is set. A down mailbox must not fail the registration.
 
 ## Deferred features (do not build in v1)
 

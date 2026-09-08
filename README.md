@@ -21,6 +21,8 @@ There is no password-reset page. Change the live password with `npx wrangler sec
 
 SQL that touches team data uses bound parameters (`?` plus `.bind`), so a team name or email cannot change the query. Do not concatenate user text into SQL.
 
+A completed registration emails `playvejora@gmail.com` when `RESEND_API_KEY` is set (`npx wrangler secret put RESEND_API_KEY`). Signup still stores the team if the key is missing or Resend is down. Verify a sending domain on Resend before changing `MAIL_FROM`; until then the default From address is Resend's onboarding sender.
+
 ## Versioning
 
 `X.Y.Z` in `package.json`. Merging to `master` runs `.github/workflows/version.yml`, which bumps `Z` and pushes a matching tag. Bump `X` or `Y` yourself when a release deserves it:
