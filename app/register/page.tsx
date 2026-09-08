@@ -9,7 +9,7 @@ export default function RegisterPage() {
   );
 
   return (
-    <>
+    <div className="wrap page-top section-tight">
       <div className="page-head">
         <span className="kicker">Season one · Edinburgh</span>
         <h1>Register a team</h1>
@@ -19,6 +19,6 @@ export default function RegisterPage() {
         </p>
       </div>
       <RegisterWizard waiverText={waiverText} />
-    </>
+    </div>
   );
 }

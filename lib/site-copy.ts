@@ -1,5 +1,6 @@
 export const site = {
   name: "PlayVejora",
+  wordmark: { lead: "Play", accent: "Vejora" },
   city: "Edinburgh",
   tagline: "After-work football for company sides.",
   nav: [

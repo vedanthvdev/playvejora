@@ -15,7 +15,7 @@ export default async function AdminPage() {
   const waitlisted = teams.length - inLeague;
 
   return (
-    <>
+    <div className="wrap page-top section-tight">
       <div className="page-head">
         <span className="kicker">Organizers only</span>
         <h1>Team intake</h1>
@@ -70,6 +70,6 @@ export default async function AdminPage() {
           </table>
         </div>
       )}
-    </>
+    </div>
   );
 }
