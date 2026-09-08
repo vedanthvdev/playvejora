@@ -142,6 +142,18 @@ Rules:
 - Reading content width: `640px` for prose, `46rem` for page introductions.
 - Desktop section padding: `48–96px` block.
 - Mobile section padding: `48px` block.
+
+### Vertical rhythm
+
+Two tokens own the space between top-level blocks: `--rhythm` (`48–96px`) for standard sections and `--rhythm-sm` (`32–56px`) for tighter trailing blocks such as a closing callout.
+
+Every top-level block sets `padding-block`, never a top margin. Two adjacent constrained blocks would otherwise stack two paddings and create a gap roughly twice the intended size, so `.main > .wrap + .wrap` drops the second block's top padding. A constrained block that follows a full-bleed band keeps its own top padding, because the band contributes no outside spacing. The result is one predictable gap between any two blocks.
+
+Do not combine `page-top` with `section-tight` on the same element; the two padding declarations fight and the winner depends on source order.
+
+### Card grids
+
+`.cards` fits tracks to the card count rather than fixing three columns, so a three-card page and a four-step page both fill a single row and neither strands an orphan card. Below `960px` the grid drops to two columns, and below `640px` to one.
 - Desktop hero block padding: `56–136px`; mobile `56px`.
 - Hero, stats, and closing bands are full-bleed and square-cornered. Cards, panels, and callouts stay rounded inside the wrap.
 - Cards use three columns on desktop, two on tablet, and one on mobile.

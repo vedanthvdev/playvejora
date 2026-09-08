@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { home, howItWorks } from "@/lib/site-copy";
+
+export const metadata: Metadata = {
+  title: "How it works",
+  description: howItWorks.lede,
+  alternates: { canonical: "/how-it-works" },
+};
 
 export default function HowItWorksPage() {
   return (

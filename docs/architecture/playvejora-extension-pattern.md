@@ -6,7 +6,9 @@ Do not reverse these v1 rules when extending: Edinburgh-only public UI, no parti
 
 ## Seams
 
-- **Routes:** add pages under `app/`. Keep `lib/site-copy.ts` nav limited to public destinations.
+- **Routes:** add pages under `app/`. Keep `lib/site-copy.ts` nav limited to public destinations. Origin lives at `/origin` and is in the public nav.
+- **SEO:** default metadata, Open Graph, `app/sitemap.ts`, and `app/robots.ts` share `lib/seo.ts`. Set `SITE_URL` in production so canonical URLs and the sitemap are absolute. Do not index `/admin`.
+- **Hosted version:** `/version.info` reads `package.json` at request time. Do not cache it. Do not list it in the sitemap.
 - **Intake fields:** extend `TeamInput` and the `teams` table in `lib/registration.ts`. Run assignment inside the same write transaction.
 - **City:** each row already has `city` defaulting to `edinburgh`. More cities should filter and cap by city. Per-city versus shared waitlist is still to decide.
 - **Admin:** reuse `teamsForAdmin` and the cookie in `lib/admin-auth.ts`. Do not list PII on unauthenticated routes.
@@ -18,7 +20,6 @@ Do not reverse these v1 rules when extending: Edinburgh-only public UI, no parti
 | Stripe | After waiver, before or after `submitTeam`, with a payment column | R10 today: no payment UI until that work starts |
 | Match stats | New tables and a results route | Do not require player logins |
 | Photos / awards | New route plus media store | Keep the shell minimal |
-| `/origin` | `app/origin/page.tsx` | Optional nav item later |
 | Charity choice | Field on `TeamInput` | No amounts in copy |
 | Top scorers | Route that reads stats tables | Photos can wait for assets |
 | More cities | `city` column + copy, still no picker until a second city opens | Live UI stays Edinburgh until then |

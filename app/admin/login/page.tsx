@@ -16,7 +16,7 @@ async function LoginForm({
 }) {
   const params = await searchParams;
   return (
-    <div className="wrap page-top section-tight">
+    <div className="wrap page-top">
       <div className="page-head">
         <span className="kicker">Organizers only</span>
         <h1>Organizer login</h1>

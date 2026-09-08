@@ -28,6 +28,8 @@ const REQUIRED_TOKENS = [
   "--space-4",
   "--radius-card",
   "--shadow-md",
+  "--rhythm",
+  "--rhythm-sm",
 ];
 
 describe("design system tokens", () => {

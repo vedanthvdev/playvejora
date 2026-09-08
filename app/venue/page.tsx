@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { venue } from "@/lib/site-copy";
+
+export const metadata: Metadata = {
+  title: "Venue, rules, and safety",
+  description: venue.lede,
+  alternates: { canonical: "/venue" },
+};
 
 export default function VenuePage() {
   return (

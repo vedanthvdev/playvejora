@@ -34,6 +34,8 @@
   --space-20: 80px;
   --gutter: clamp(20px, 5vw, 72px);
   --content: 1440px;
+  --rhythm: clamp(48px, 6vw, 96px);
+  --rhythm-sm: clamp(32px, 4vw, 56px);
   --radius-sm: 10px;
   --radius-card: 16px;
   --radius-lg: 24px;
@@ -128,15 +130,21 @@ a {
 }
 
 .page-top {
-  padding-top: clamp(var(--space-10), 5vw, var(--space-16));
+  padding-block: var(--rhythm);
 }
 
 .section {
-  padding-block: clamp(var(--space-12), 6vw, 96px);
+  padding-block: var(--rhythm);
 }
 
 .section-tight {
-  padding-block: clamp(var(--space-8), 4vw, var(--space-12));
+  padding-block: var(--rhythm-sm);
+}
+
+/* Adjacent constrained blocks share one gap instead of stacking two.
+   A block following a full-bleed band keeps its own top padding. */
+.main > .wrap + .wrap {
+  padding-top: 0;
 }
 
 /* ---------- header ---------- */
@@ -486,9 +494,11 @@ input:focus-visible {
   margin-bottom: var(--space-8);
 }
 
+/* Tracks fit the card count, so a four-step page fills one row
+   instead of stranding a fourth card on its own. */
 .cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
   gap: var(--space-5);
 }
 
@@ -574,7 +584,7 @@ input:focus-visible {
   display: grid;
   gap: var(--space-5);
   justify-items: start;
-  padding-block: clamp(var(--space-12), 6vw, 96px);
+  padding-block: var(--rhythm);
 }
 
 .band h2 {

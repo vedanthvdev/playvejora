@@ -7,6 +7,7 @@ export const site = {
     { href: "/", label: "Home" },
     { href: "/how-it-works", label: "How it works" },
     { href: "/venue", label: "Venue & rules" },
+    { href: "/origin", label: "Origin" },
     { href: "/register", label: "Register" },
   ],
 };
@@ -92,6 +93,30 @@ export const venue = {
   safety: {
     title: "Safety and the waiver",
     body: "Football carries a risk of injury. The captain accepts the waiver on behalf of the listed team when they register. The current waiver text is a placeholder and will be replaced before the season starts.",
+  },
+};
+
+export const origin = {
+  kicker: "How it started",
+  title: "Two colleagues, one idea after work.",
+  lede: "PlayVejora began with two friends who worked at the same company and wanted somewhere other workplace sides could meet, play football, and stay for the chat.",
+  story: [
+    {
+      title: "It started at work",
+      body: "Two colleagues shared a pitch, then a plan: make it easy for other companies to turn up and play after hours, without building another login-heavy sports app.",
+    },
+    {
+      title: "The point is the people",
+      body: "The league exists so teams can socialise as much as they compete. Finish work, play football, then talk about something other than tickets.",
+    },
+    {
+      title: "Edinburgh first",
+      body: "Season one stays in one city so the format can settle. More cities can follow later without changing why the idea exists.",
+    },
+  ],
+  closing: {
+    title: "Bring a side from your office",
+    body: "If that origin sounds like your workplace, a captain can register the whole team in a few minutes.",
   },
 };
 

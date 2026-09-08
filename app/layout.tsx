@@ -2,12 +2,29 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { footer, site } from "@/lib/site-copy";
+import { defaultDescription, siteUrl, sportsClubJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: `${site.name} — ${site.tagline}`,
-  description:
-    "PlayVejora is a company-first after-work football league in Edinburgh. A captain registers the whole team.",
+  metadataBase: new URL(siteUrl()),
+  title: {
+    default: `${site.name} — ${site.tagline}`,
+    template: `%s — ${site.name}`,
+  },
+  description: defaultDescription,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "en_GB",
+    siteName: site.name,
+    title: `${site.name} — ${site.tagline}`,
+    description: defaultDescription,
+  },
+  twitter: {
+    card: "summary",
+    title: `${site.name} — ${site.tagline}`,
+    description: defaultDescription,
+  },
 };
 
 const registerLink = site.nav.find((item) => item.href === "/register") ?? {
@@ -20,9 +37,15 @@ export default function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const structuredData = JSON.stringify(sportsClubJsonLd());
+
   return (
-    <html lang="en">
+    <html lang="en-GB">
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: structuredData }}
+        />
         <header className="site-header">
           <div className="wrap header-inner">
             <Link className="wordmark" href="/">
@@ -50,6 +73,7 @@ export default function RootLayout({
         <footer className="site-footer">
           <div className="wrap footer-inner">
             <span>{footer.note}</span>
+            <Link href="/origin">Origin</Link>
             <span>{site.tagline}</span>
           </div>
         </footer>
