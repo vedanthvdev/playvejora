@@ -1,4 +1,4 @@
-import { liveCompetition } from "@/lib/competitions";
+import { getCompetitionByPublicId, DEFAULT_COMPETITION_PUBLIC_ID } from "@/lib/competitions";
 import { getDatabase } from "@/lib/db";
 import { newPublicId } from "@/lib/ids";
 
@@ -12,6 +12,7 @@ export type TeamInput = {
   captainEmail: string;
   playerNames: string[];
   waiverAccepted: boolean;
+  competitionPublicId?: string;
 };
 
 export type TeamRecord = {
@@ -28,6 +29,7 @@ export type TeamRecord = {
   sport: string;
   season: string;
   competitionId: number;
+  competitionPublicId: string;
   paymentStatus: PaymentStatus;
   createdAt: string;
 };
@@ -36,6 +38,7 @@ export type TeamListFilter = {
   city?: string;
   sport?: string;
   status?: TeamStatus | "";
+  competitionId?: number;
 };
 
 export type TeamUpdate = {
@@ -67,6 +70,7 @@ type TeamRow = {
   sport: string;
   season: string;
   competition_id: number;
+  competition_public_id: string;
   payment_status: PaymentStatus;
   created_at: string;
 };
@@ -77,7 +81,8 @@ const TEAM_SELECT = `
   SELECT
     teams.*,
     competitions.sport AS sport,
-    competitions.season AS season
+    competitions.season AS season,
+    competitions.public_id AS competition_public_id
   FROM teams
   INNER JOIN competitions ON competitions.id = teams.competition_id
 `;
@@ -116,6 +121,7 @@ function mapRow(row: TeamRow): TeamRecord {
     sport: row.sport,
     season: row.season,
     competitionId: row.competition_id,
+    competitionPublicId: row.competition_public_id,
     paymentStatus: row.payment_status,
     createdAt: row.created_at,
   };
@@ -155,7 +161,12 @@ export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
     return { ok: false, error: "The captain must accept the waiver for the team." };
   }
 
-  const competition = await liveCompetition();
+  const competition = await getCompetitionByPublicId(
+    input.competitionPublicId?.trim() || DEFAULT_COMPETITION_PUBLIC_ID,
+  );
+  if (!competition || !competition.listed) {
+    return { ok: false, error: "That league is not open for registration." };
+  }
   const db = await getDatabase();
   const now = new Date().toISOString();
   const publicId = newPublicId("tm");
@@ -198,6 +209,10 @@ export async function listTeams(filter: TeamListFilter = {}): Promise<TeamRecord
   if (filter.status === "in_league" || filter.status === "waitlist") {
     clauses.push("teams.status = ?");
     values.push(filter.status);
+  }
+  if (filter.competitionId) {
+    clauses.push("teams.competition_id = ?");
+    values.push(filter.competitionId);
   }
   const where = clauses.length ? ` WHERE ${clauses.join(" AND ")}` : "";
   const { results } = await db

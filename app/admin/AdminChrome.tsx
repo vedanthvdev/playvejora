@@ -22,11 +22,19 @@ export function AdminChrome({
             </span>
           </Link>
           {loggedIn ? (
-            <form className="admin-logout" action={logoutAdminAction}>
-              <button className="btn btn-solid" type="submit">
-                Log out
-              </button>
-            </form>
+            <>
+              <nav className="nav" aria-label="Organizer">
+                <Link href="/admin">Team intake</Link>
+                <Link href="/admin/competitions">Competitions</Link>
+                <Link href="/admin/sports/football">Football</Link>
+                <Link href="/admin/sports/volleyball">Volleyball</Link>
+              </nav>
+              <form className="admin-logout" action={logoutAdminAction}>
+                <button className="btn btn-solid" type="submit">
+                  Log out
+                </button>
+              </form>
+            </>
           ) : (
             <span className="admin-badge">Organizers</span>
           )}

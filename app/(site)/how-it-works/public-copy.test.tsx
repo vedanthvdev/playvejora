@@ -15,6 +15,13 @@ describe("public copy", () => {
     expect(blob).toMatch(/Payment is not collected/i);
   });
 
+  it("keeps one generic how-it-works rather than a section per sport", () => {
+    expect(howItWorks.steps).toHaveLength(4);
+    expect(howItWorks.steps.map((step) => step.body).join(" ")).not.toMatch(
+      /football|netball/i,
+    );
+  });
+
   it("splits the two-tone wordmark without altering the product name", () => {
     expect(site.wordmark.lead + site.wordmark.accent).toBe(site.name);
   });
@@ -25,18 +32,31 @@ describe("public copy", () => {
     expect(origin.lede).not.toMatch(/\b(John|Jane|Alex Smith)\b/);
   });
 
-  it("keeps the live league in Edinburgh without a fake venue or city picker", () => {
-    expect(home.kicker).toMatch(/Edinburgh/);
-    expect(venue.cityLine).toMatch(/Edinburgh/);
+  it("keeps landing copy free of a single hardcoded city or sport", () => {
+    const landing = `${home.kicker} ${home.title} ${home.lede}`;
+    expect(landing).not.toMatch(/Edinburgh/i);
+    expect(landing).not.toMatch(/football/i);
     expect(venue.venueLine).toMatch(/to be confirmed/i);
     expect(venue.venueLine).not.toMatch(/\d{1,4}\s+\w+\s+(Street|Road|Lane)/);
+  });
+
+  it("describes league capacity as teams rather than places", () => {
+    expect(home.lede).toMatch(/teams (?:are )?allowed/i);
+    expect(home.stats.map((row) => row.term)).toContain("Teams allowed");
+    expect(`${home.lede} ${home.steps.map((step) => step.body).join(" ")}`).not.toMatch(
+      /\bplaces\b/i,
+    );
+  });
+
+  it("keeps register out of the nav list and origin out of the footer", () => {
     expect(site.nav.map((item) => item.href)).toEqual([
       "/",
       "/how-it-works",
       "/venue",
+      "/stats",
       "/origin",
-      "/register",
     ]);
+    expect(site.nav.map((item) => item.href)).not.toContain("/register");
   });
 });
 
@@ -66,11 +86,11 @@ describe("seo helpers", () => {
     );
   });
 
-  it("describes an Edinburgh club without a street address", () => {
+  it("describes a club without a street address or a single sport", () => {
     const data = sportsClubJsonLd();
     expect(data["@type"]).toBe("SportsClub");
-    expect(data.areaServed).toEqual({ "@type": "City", name: "Edinburgh" });
     expect(JSON.stringify(data)).not.toMatch(/streetAddress/);
+    expect(JSON.stringify(data)).not.toMatch(/Association football/);
   });
 
   it("publishes one contact address for search results and the site", () => {

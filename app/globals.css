@@ -613,6 +613,61 @@ input:focus-visible {
   max-width: 44rem;
 }
 
+.form-wide {
+  max-width: none;
+}
+
+.form-grid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel-title {
+  margin: 0 0 var(--space-5);
+  font-size: 1.15rem;
+}
+
+.comp-layout {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.sets-row {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.scorer-list {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.scorer-list legend {
+  font-weight: 570;
+  margin-bottom: var(--space-2);
+}
+
+input[type="number"] {
+  width: 100%;
+  min-height: var(--control);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--pitch-500);
+  box-shadow: 0 0 0 3px rgba(31, 138, 76, 0.15);
+}
+
 label {
   display: grid;
   gap: var(--space-2);
@@ -685,6 +740,12 @@ input[type="password"]:focus {
   background: var(--error-bg);
   color: var(--error-ink);
   font-size: 0.95rem;
+}
+
+.competition-choice {
+  margin: 0 0 var(--space-4);
+  color: var(--ink-secondary);
+  font-weight: 650;
 }
 
 /* ---------- register progress ---------- */
@@ -844,7 +905,15 @@ td {
   padding: var(--space-4);
   border-bottom: 1px solid var(--surface-subtle);
   color: var(--ink-secondary);
-  vertical-align: top;
+  vertical-align: middle;
+}
+
+/* A long squad list must not make one row taller than the rest. */
+td.clamp {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 td:first-child {
@@ -890,9 +959,27 @@ td.strong {
   white-space: nowrap;
 }
 
+.row-actions form {
+  display: inline-block;
+  margin-right: var(--space-2);
+}
+
+.row-actions form:last-child {
+  margin-right: 0;
+}
+
 .row-actions a {
   margin-right: var(--space-4);
   font-weight: 580;
+}
+
+.row-actions a:last-child {
+  margin-right: 0;
+}
+
+.row-actions a.destructive,
+.row-actions button.destructive {
+  color: var(--error-ink);
 }
 
 select {
@@ -1027,6 +1114,11 @@ textarea {
   }
 
   .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid,
+  .sets-row {
     grid-template-columns: 1fr;
   }
 

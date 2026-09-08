@@ -10,11 +10,11 @@ export default function HomePage() {
           <h1>{home.title}</h1>
           <p>{home.lede}</p>
           <div className="hero-actions">
-            <Link className="btn btn-primary" href="/register">
-              {home.cta}
-            </Link>
-            <Link className="btn btn-ghost" href="/how-it-works">
+            <Link className="btn btn-primary" href="/how-it-works">
               {home.secondaryCta}
+            </Link>
+            <Link className="btn btn-ghost" href="/stats">
+              {home.statsCta}
             </Link>
           </div>
         </div>
@@ -34,10 +34,7 @@ export default function HomePage() {
       <section className="wrap section">
         <div className="section-head">
           <h2>How a team gets in</h2>
-          <p>
-            No accounts, no squad-size rules yet, and nothing to settle on this
-            site.
-          </p>
+          <p>No accounts, and the open leagues are listed when you register.</p>
         </div>
         <div className="cards">
           {home.steps.map((step, index) => (
@@ -47,16 +44,6 @@ export default function HomePage() {
               <p>{step.body}</p>
             </article>
           ))}
-        </div>
-      </section>
-
-      <section className="band bleed">
-        <div className="wrap band-inner">
-          <h2>{home.closing.title}</h2>
-          <p>{home.closing.body}</p>
-          <Link className="btn btn-primary" href="/register">
-            {home.cta}
-          </Link>
         </div>
       </section>
     </>

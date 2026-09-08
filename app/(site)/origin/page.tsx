@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { home, origin } from "@/lib/site-copy";
+import { origin } from "@/lib/site-copy";
 
 export const metadata: Metadata = {
   title: "Origin",
@@ -32,16 +31,6 @@ export default function OriginPage() {
           ))}
         </div>
       </div>
-
-      <section className="band bleed">
-        <div className="wrap band-inner">
-          <h2>{origin.closing.title}</h2>
-          <p>{origin.closing.body}</p>
-          <Link className="btn btn-primary" href="/register">
-            {home.cta}
-          </Link>
-        </div>
-      </section>
     </>
   );
 }

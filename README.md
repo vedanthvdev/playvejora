@@ -23,7 +23,7 @@ SQL that touches team data uses bound parameters (`?` plus `.bind`), so a team n
 
 A completed registration emails `playvejora@gmail.com` and the captain when `RESEND_API_KEY` is set (`npx wrangler secret put RESEND_API_KEY`). Both messages include the public team reference (`tm_…`). Signup still stores the team if the key is missing or Resend is down. Verify a sending domain on Resend before changing `MAIL_FROM`; until then the default From address is Resend's onboarding sender.
 
-Each registration belongs to a competition (city + sport + season) with its own league cap. Season one is Edinburgh football. Organizers can filter `/admin` by city, sport, and in-league vs waitlist. Payment is not collected yet; the schema already has Stripe columns and a `league_paid_waitlist_free` mode for when league places should require payment while the waitlist stays free.
+Each registration belongs to a competition (city + sport + season) with its own cap of league teams allowed. Sports are football and volleyball; cities are Edinburgh and Manchester. Organizers add leagues from that list, hide ones that should not take new teams, and post football and volleyball results on their own admin pages. Public stats are per sport. Payment is not collected yet; the schema already has Stripe columns and a `league_paid_waitlist_free` mode for when in-league teams should require payment while the waitlist stays free.
 
 ## Versioning
 
