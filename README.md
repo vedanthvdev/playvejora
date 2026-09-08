@@ -33,15 +33,11 @@ Visual language lives in [`docs/design/playvejora-design-system.md`](docs/design
 
 The public origin is `https://playvejora.dpdns.org`. `lib/seo.ts` falls back to that value, so canonical URLs, Open Graph tags, and the sitemap are correct even if the host forgets an environment variable. Set `SITE_URL` anyway on any environment that is not production, otherwise a staging box will advertise the live domain to crawlers.
 
-Registrations live in SQLite at `data/playvejora.sqlite`, so the app needs a Node host with a persistent disk (`npm run build` then `npm start`) rather than a diskless serverless platform. A container host such as Fly.io, Render, or Railway with a mounted volume works; so does a small VPS behind a reverse proxy.
+Registrations live in SQLite at `data/playvejora.sqlite`, so the app needs a host with a persistent disk rather than a diskless serverless platform. The target is a single Fly.io machine in `lhr` with a mounted volume; `Dockerfile` and `fly.toml` describe it and [`docs/deploy/fly-io.md`](docs/deploy/fly-io.md) has the setup, DNS, and backup steps.
 
-Pointing the domain at that host, in the FreeDomain DNS panel for `playvejora.dpdns.org`:
+A volume cannot be shared between machines, so the app stays on one machine and every deploy uses `--ha=false`. Scaling out means moving to Postgres, not adding machines.
 
-- If the host gives you a hostname, add a `CNAME` record on the root pointing at it, or a `CNAME` on `www` plus the host's own apex redirect if it refuses a root `CNAME`.
-- If the host gives you an IP address, add an `A` record on the root and a second one for `www`.
-- Keep TTL low (300s) until the cutover is confirmed, then raise it.
-
-Then, on the host: add the custom domain so it issues a TLS certificate, set `ADMIN_PASSWORD` to a real value (the build refuses the pre-launch fallback in production), and confirm the release with `curl https://playvejora.dpdns.org/version.info`, which returns the name and version straight from `package.json` with no caching.
+Set `ADMIN_PASSWORD` on the host before the domain is public; the production build refuses the pre-launch fallback. Confirm any release with `curl https://playvejora.dpdns.org/version.info`, which returns the name and version straight from `package.json` with no caching.
 
 ## Notes
 
