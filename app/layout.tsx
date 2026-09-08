@@ -71,11 +71,12 @@ export default function RootLayout({
         </header>
         <main className="main">{children}</main>
         <footer className="site-footer">
-          <div className="wrap footer-inner">
-            <span>{footer.note}</span>
-            <Link href="/origin">Origin</Link>
-            <span>{site.tagline}</span>
-          </div>
+            <div className="wrap footer-inner">
+              <span>{footer.note}</span>
+              <Link href="/origin">Origin</Link>
+              <a href={`mailto:${site.email}`}>{site.email}</a>
+              <span>{site.tagline}</span>
+            </div>
         </footer>
       </body>
     </html>

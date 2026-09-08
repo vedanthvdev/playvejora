@@ -991,6 +991,12 @@ td.strong {
     grid-template-columns: 1fr;
     gap: var(--space-2);
   }
+
+  .footer-inner a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

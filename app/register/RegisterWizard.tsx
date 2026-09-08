@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { site } from "@/lib/site-copy";
 import { registerTeamAction } from "./actions";
 
 type Props = {
@@ -239,6 +240,13 @@ export function RegisterWizard({ waiverText }: Props) {
               {captainEmail} if a place frees up.
             </p>
           </div>
+        ) : null}
+
+        {step === 3 ? (
+          <p className="hint">
+            Anything to ask before then? Email{" "}
+            <a href={`mailto:${site.email}`}>{site.email}</a>.
+          </p>
         ) : null}
       </div>
     </div>
