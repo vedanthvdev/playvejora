@@ -24,6 +24,17 @@ export type TeamRecord = {
   createdAt: string;
 };
 
+export type TeamUpdate = {
+  teamName: string;
+  company: string;
+  friendsOrMixed: boolean;
+  captainEmail: string;
+  playerNames: string[];
+  status: TeamStatus;
+};
+
+export type UpdateResult = { ok: true } | { ok: false; error: string };
+
 export type SubmitResult =
   | { ok: true; status: TeamStatus }
   | { ok: false; error: string };
@@ -78,7 +89,14 @@ function mapRow(row: TeamRow): TeamRecord {
   };
 }
 
-export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
+function parsedFields(
+  input: Pick<
+    TeamInput,
+    "teamName" | "company" | "captainEmail" | "playerNames"
+  >,
+):
+  | { ok: true; teamName: string; company: string; email: string; players: string[] }
+  | { ok: false; error: string } {
   const teamName = input.teamName.trim();
   const company = input.company.trim();
   const players = input.playerNames.map((name) => name.trim()).filter(Boolean);
@@ -93,6 +111,14 @@ export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
   if (players.length < 1) {
     return { ok: false, error: "Add at least one player name." };
   }
+  return { ok: true, teamName, company, email, players };
+}
+
+export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
+  const fields = parsedFields(input);
+  if (!fields.ok) {
+    return fields;
+  }
   if (!input.waiverAccepted) {
     return { ok: false, error: "The captain must accept the waiver for the team." };
   }
@@ -102,11 +128,11 @@ export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
   const row = await db
     .prepare(INSERT_TEAM)
     .bind(
-      teamName,
-      company,
+      fields.teamName,
+      fields.company,
       input.friendsOrMixed ? 1 : 0,
-      email,
-      JSON.stringify(players),
+      fields.email,
+      JSON.stringify(fields.players),
       now,
       CITY,
       LEAGUE_CAP,
@@ -127,4 +153,55 @@ export async function listTeams(): Promise<TeamRecord[]> {
     .prepare(`SELECT * FROM teams ORDER BY created_at ASC, id ASC`)
     .all<TeamRow>();
   return results.map(mapRow);
+}
+
+export async function getTeam(id: number): Promise<TeamRecord | null> {
+  const db = await getDatabase();
+  const row = await db
+    .prepare(`SELECT * FROM teams WHERE id = ?`)
+    .bind(id)
+    .first<TeamRow>();
+  return row ? mapRow(row) : null;
+}
+
+export async function updateTeam(
+  id: number,
+  input: TeamUpdate,
+): Promise<UpdateResult> {
+  const fields = parsedFields(input);
+  if (!fields.ok) {
+    return fields;
+  }
+  if (input.status !== "in_league" && input.status !== "waitlist") {
+    return { ok: false, error: "Status must be in league or waitlist." };
+  }
+  if (!(await getTeam(id))) {
+    return { ok: false, error: "That team is not on the list." };
+  }
+
+  const db = await getDatabase();
+  await db
+    .prepare(
+      `UPDATE teams SET team_name = ?, company = ?, friends_or_mixed = ?, captain_email = ?, player_names = ?, status = ? WHERE id = ?`,
+    )
+    .bind(
+      fields.teamName,
+      fields.company,
+      input.friendsOrMixed ? 1 : 0,
+      fields.email,
+      JSON.stringify(fields.players),
+      input.status,
+      id,
+    )
+    .run();
+  return { ok: true };
+}
+
+export async function deleteTeam(id: number): Promise<boolean> {
+  if (!(await getTeam(id))) {
+    return false;
+  }
+  const db = await getDatabase();
+  await db.prepare(`DELETE FROM teams WHERE id = ?`).bind(id).run();
+  return true;
 }

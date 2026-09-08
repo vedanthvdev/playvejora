@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { ADMIN_COOKIE } from "@/lib/admin-auth";
 import { teamsForAdmin } from "@/lib/admin-data";
 
 export default async function AdminPage() {
-  const jar = await cookies();
-  const token = jar.get(ADMIN_COOKIE)?.value;
+  const token = (await cookies()).get(ADMIN_COOKIE)?.value;
   const teams = await teamsForAdmin(token);
   if (!teams) {
     redirect("/admin/login");
@@ -42,6 +42,7 @@ export default async function AdminPage() {
                 <th>Players</th>
                 <th>Waiver</th>
                 <th>Status</th>
+                <th> </th>
               </tr>
             </thead>
             <tbody>
@@ -63,6 +64,10 @@ export default async function AdminPage() {
                     >
                       {team.status === "in_league" ? "In league" : "Waitlist"}
                     </span>
+                  </td>
+                  <td className="row-actions">
+                    <Link href={`/admin/${team.id}`}>Edit</Link>
+                    <Link href={`/admin/${team.id}/delete`}>Delete</Link>
                   </td>
                 </tr>
               ))}

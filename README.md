@@ -15,6 +15,12 @@ Under `npm run dev` the login accepts `playvejora-dev` with no configuration. Co
 
 The fallback is refused whenever the runtime reports production, which includes the Workers runtime, so `npm run preview` and the deployed site both need a real password. Set it in `.dev.vars` locally (see `.dev.vars.example`) and as a Cloudflare secret in production.
 
+Logging in stores a random session in D1 that expires after twelve hours. The organizer header has a log out button that ends that session, so leaving `/admin` open on a borrowed laptop is recoverable without rotating the password. The same password can be used on more than one device at once; each login gets its own session. Five failed logins from one address pause that address for ten minutes, and one address can submit five registrations an hour.
+
+There is no password-reset page. Change the live password with `npx wrangler secret put ADMIN_PASSWORD` and tell organizers the new value. Existing sessions stay valid until they expire or log out. Locally, put the same name in `.dev.vars` or `.env`.
+
+SQL that touches team data uses bound parameters (`?` plus `.bind`), so a team name or email cannot change the query. Do not concatenate user text into SQL.
+
 ## Versioning
 
 `X.Y.Z` in `package.json`. Merging to `master` runs `.github/workflows/version.yml`, which bumps `Z` and pushes a matching tag. Bump `X` or `Y` yourself when a release deserves it:
