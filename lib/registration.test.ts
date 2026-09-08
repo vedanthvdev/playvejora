@@ -1,24 +1,22 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { closeDb, listTeams, submitTeam } from "./registration";
+import { useDatabase } from "./db";
+import { createTestDatabase } from "./test-db";
+import { listTeams, submitTeam } from "./registration";
 
 describe("submitTeam", () => {
-  let dir: string;
+  let db: ReturnType<typeof createTestDatabase>;
 
   beforeEach(() => {
-    dir = fs.mkdtempSync(path.join(os.tmpdir(), "playvejora-"));
-    process.env.PLAYVEJORA_DB_PATH = path.join(dir, "test.sqlite");
+    db = createTestDatabase();
+    useDatabase(db);
   });
 
   afterEach(() => {
-    closeDb();
-    delete process.env.PLAYVEJORA_DB_PATH;
-    fs.rmSync(dir, { recursive: true, force: true });
+    useDatabase(null);
+    db.close();
   });
 
-  it("marks the fifth complete Edinburgh team in-league and the sixth waitlist", () => {
+  it("marks the fifth complete Edinburgh team in-league and the sixth waitlist", async () => {
     const base = {
       company: "Acme",
       friendsOrMixed: false,
@@ -27,18 +25,19 @@ describe("submitTeam", () => {
       waiverAccepted: true,
     };
     for (let i = 1; i <= 4; i += 1) {
-      const result = submitTeam({ ...base, teamName: `Team ${i}` });
+      const result = await submitTeam({ ...base, teamName: `Team ${i}` });
       expect(result).toEqual({ ok: true, status: "in_league" });
     }
-    expect(submitTeam({ ...base, teamName: "Team 5" })).toEqual({
+    expect(await submitTeam({ ...base, teamName: "Team 5" })).toEqual({
       ok: true,
       status: "in_league",
     });
-    expect(submitTeam({ ...base, teamName: "Team 6" })).toEqual({
+    expect(await submitTeam({ ...base, teamName: "Team 6" })).toEqual({
       ok: true,
       status: "waitlist",
     });
-    expect(listTeams().map((row) => row.status)).toEqual([
+    const teams = await listTeams();
+    expect(teams.map((row) => row.status)).toEqual([
       "in_league",
       "in_league",
       "in_league",
@@ -48,8 +47,8 @@ describe("submitTeam", () => {
     ]);
   });
 
-  it("allows a friends side with no company name", () => {
-    const result = submitTeam({
+  it("allows a friends side with no company name", async () => {
+    const result = await submitTeam({
       teamName: "Sunday Kickabout",
       company: "",
       friendsOrMixed: true,
@@ -58,12 +57,14 @@ describe("submitTeam", () => {
       waiverAccepted: true,
     });
     expect(result).toEqual({ ok: true, status: "in_league" });
-    expect(listTeams()[0].company).toBe("");
-    expect(listTeams()[0].friendsOrMixed).toBe(true);
+    const teams = await listTeams();
+    expect(teams[0].company).toBe("");
+    expect(teams[0].friendsOrMixed).toBe(true);
+    expect(teams[0].playerNames).toEqual(["Sam"]);
   });
 
-  it("does not insert when the waiver is not accepted", () => {
-    const result = submitTeam({
+  it("does not insert when the waiver is not accepted", async () => {
+    const result = await submitTeam({
       teamName: "No Waiver FC",
       company: "Acme",
       friendsOrMixed: false,
@@ -72,11 +73,11 @@ describe("submitTeam", () => {
       waiverAccepted: false,
     });
     expect(result.ok).toBe(false);
-    expect(listTeams()).toEqual([]);
+    expect(await listTeams()).toEqual([]);
   });
 
-  it("does not insert an invalid email", () => {
-    const result = submitTeam({
+  it("does not insert an invalid email", async () => {
+    const result = await submitTeam({
       teamName: "Bad Email FC",
       company: "Acme",
       friendsOrMixed: false,
@@ -85,6 +86,6 @@ describe("submitTeam", () => {
       waiverAccepted: true,
     });
     expect(result.ok).toBe(false);
-    expect(listTeams()).toEqual([]);
+    expect(await listTeams()).toEqual([]);
   });
 });

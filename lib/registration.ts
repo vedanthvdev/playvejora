@@ -1,6 +1,4 @@
-import fs from "node:fs";
-import path from "node:path";
-import Database from "better-sqlite3";
+import { getDatabase } from "@/lib/db";
 
 export type TeamStatus = "in_league" | "waitlist";
 
@@ -30,50 +28,7 @@ export type SubmitResult =
   | { ok: true; status: TeamStatus }
   | { ok: false; error: string };
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CITY = "edinburgh";
-const LEAGUE_CAP = 5;
-
-let connection: Database.Database | null = null;
-let connectionPath: string | null = null;
-
-export function dbFilePath(): string {
-  return process.env.PLAYVEJORA_DB_PATH ?? path.join(process.cwd(), "data", "playvejora.sqlite");
-}
-
-export function closeDb(): void {
-  connection?.close();
-  connection = null;
-  connectionPath = null;
-}
-
-function getDb(): Database.Database {
-  const file = dbFilePath();
-  if (connection && connectionPath === file) {
-    return connection;
-  }
-  closeDb();
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  connection = new Database(file);
-  connectionPath = file;
-  connection.exec(`
-    CREATE TABLE IF NOT EXISTS teams (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      team_name TEXT NOT NULL,
-      company TEXT NOT NULL,
-      friends_or_mixed INTEGER NOT NULL,
-      captain_email TEXT NOT NULL,
-      player_names TEXT NOT NULL,
-      waiver_accepted_at TEXT NOT NULL,
-      status TEXT NOT NULL,
-      city TEXT NOT NULL,
-      created_at TEXT NOT NULL
-    )
-  `);
-  return connection;
-}
-
-function mapRow(row: {
+type TeamRow = {
   id: number;
   team_name: string;
   company: string;
@@ -84,7 +39,31 @@ function mapRow(row: {
   status: TeamStatus;
   city: string;
   created_at: string;
-}): TeamRecord {
+};
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CITY = "edinburgh";
+const LEAGUE_CAP = 5;
+
+// The league place is decided inside the insert because D1 has no interactive
+// transactions, and a read-then-write would let two captains take the last place.
+const INSERT_TEAM = `
+  INSERT INTO teams (
+    team_name, company, friends_or_mixed, captain_email, player_names,
+    waiver_accepted_at, status, city, created_at
+  ) VALUES (
+    ?, ?, ?, ?, ?, ?,
+    CASE
+      WHEN (SELECT COUNT(*) FROM teams WHERE city = ? AND status = 'in_league') < ?
+      THEN 'in_league'
+      ELSE 'waitlist'
+    END,
+    ?, ?
+  )
+  RETURNING status
+`;
+
+function mapRow(row: TeamRow): TeamRecord {
   return {
     id: row.id,
     teamName: row.team_name,
@@ -99,7 +78,7 @@ function mapRow(row: {
   };
 }
 
-export function submitTeam(input: TeamInput): SubmitResult {
+export async function submitTeam(input: TeamInput): Promise<SubmitResult> {
   const teamName = input.teamName.trim();
   const company = input.company.trim();
   const players = input.playerNames.map((name) => name.trim()).filter(Boolean);
@@ -118,40 +97,34 @@ export function submitTeam(input: TeamInput): SubmitResult {
     return { ok: false, error: "The captain must accept the waiver for the team." };
   }
 
-  const db = getDb();
-  const assign = db.transaction(() => {
-    const count = db
-      .prepare(
-        `SELECT COUNT(*) AS n FROM teams WHERE city = ? AND status = 'in_league'`,
-      )
-      .get(CITY) as { n: number };
-    const status: TeamStatus = count.n < LEAGUE_CAP ? "in_league" : "waitlist";
-    const now = new Date().toISOString();
-    db.prepare(
-      `INSERT INTO teams (
-        team_name, company, friends_or_mixed, captain_email, player_names,
-        waiver_accepted_at, status, city, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
+  const db = await getDatabase();
+  const now = new Date().toISOString();
+  const row = await db
+    .prepare(INSERT_TEAM)
+    .bind(
       teamName,
       company,
       input.friendsOrMixed ? 1 : 0,
       email,
       JSON.stringify(players),
       now,
-      status,
+      CITY,
+      LEAGUE_CAP,
       CITY,
       now,
-    );
-    return status;
-  });
+    )
+    .first<{ status: TeamStatus }>();
 
-  return { ok: true, status: assign() };
+  if (!row) {
+    return { ok: false, error: "The registration could not be saved. Try again." };
+  }
+  return { ok: true, status: row.status };
 }
 
-export function listTeams(): TeamRecord[] {
-  const rows = getDb()
+export async function listTeams(): Promise<TeamRecord[]> {
+  const db = await getDatabase();
+  const { results } = await db
     .prepare(`SELECT * FROM teams ORDER BY created_at ASC, id ASC`)
-    .all() as Parameters<typeof mapRow>[0][];
-  return rows.map(mapRow);
+    .all<TeamRow>();
+  return results.map(mapRow);
 }

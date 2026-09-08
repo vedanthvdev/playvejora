@@ -11,7 +11,9 @@ After-work football in Edinburgh. Captains register a team. The first five compl
 
 ## Organizer password
 
-Before launch the login accepts `playvejora-dev` with no configuration. Copy `.env.example` to `.env` and set `ADMIN_PASSWORD` to override it; a production build refuses to start the admin gate without one, so the default can never ship.
+Under `npm run dev` the login accepts `playvejora-dev` with no configuration. Copy `.env.example` to `.env` and set `ADMIN_PASSWORD` to override it.
+
+The fallback is refused whenever the runtime reports production, which includes the Workers runtime, so `npm run preview` and the deployed site both need a real password. Set it in `.dev.vars` locally (see `.dev.vars.example`) and as a Cloudflare secret in production.
 
 ## Versioning
 
@@ -31,23 +33,23 @@ Visual language lives in [`docs/design/playvejora-design-system.md`](docs/design
 
 ## Deployment
 
-The public origin is `https://playvejora.dpdns.org`. `lib/seo.ts` falls back to that value, so canonical URLs, Open Graph tags, and the sitemap are correct even if the host forgets an environment variable. Set `SITE_URL` anyway on any environment that is not production, otherwise a staging box will advertise the live domain to crawlers.
+The site runs on Cloudflare Workers with registrations in D1, at `https://playvejora.dpdns.org`. [`docs/deploy/cloudflare.md`](docs/deploy/cloudflare.md) has the setup and migration steps.
 
-Registrations live in SQLite at `data/playvejora.sqlite`, so the app needs a Node host with a persistent disk (`npm run build` then `npm start`) rather than a diskless serverless platform. A container host such as Fly.io, Render, or Railway with a mounted volume works; so does a small VPS behind a reverse proxy.
+```bash
+npm run preview   # build the Worker and run it locally in workerd with local D1
+npm run deploy    # build and deploy to Cloudflare
+```
 
-Pointing the domain at that host, in the FreeDomain DNS panel for `playvejora.dpdns.org`:
-
-- If the host gives you a hostname, add a `CNAME` record on the root pointing at it, or a `CNAME` on `www` plus the host's own apex redirect if it refuses a root `CNAME`.
-- If the host gives you an IP address, add an `A` record on the root and a second one for `www`.
-- Keep TTL low (300s) until the cutover is confirmed, then raise it.
-
-Then, on the host: add the custom domain so it issues a TLS certificate, set `ADMIN_PASSWORD` to a real value (the build refuses the pre-launch fallback in production), and confirm the release with `curl https://playvejora.dpdns.org/version.info`, which returns the name and version straight from `package.json` with no caching.
+Because the Workers runtime has no filesystem and no long-lived process, two rules apply to anything added here: read nothing from disk at request time, and put every schema change in `migrations/` rather than creating tables on connect.
 
 ## Notes
 
-Replace `content/waiver.md` before a real season. The shipped text is a placeholder, not legal advice.
+Replace the placeholder in `content/waiver.ts` before a real season. It is placeholder text, not legal advice.
 
 ## Scripts
 
 - `npm test` — Vitest
-- `npm run build` — production build
+- `npm run build` — Next production build
+- `npm run preview` — Worker build, served locally on workerd with local D1
+- `npm run deploy` — Worker build and deploy
+- `npm run cf:migrate:local` / `npm run cf:migrate` — apply D1 migrations

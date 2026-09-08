@@ -1,7 +1,9 @@
 import { isValidSession } from "@/lib/admin-auth";
 import { listTeams, type TeamRecord } from "@/lib/registration";
 
-export function teamsForAdmin(token: string | undefined): TeamRecord[] | null {
+export async function teamsForAdmin(
+  token: string | undefined,
+): Promise<TeamRecord[] | null> {
   if (!isValidSession(token)) {
     return null;
   }
