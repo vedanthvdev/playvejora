@@ -41,7 +41,7 @@ export function captainNotice(payload: NotifyPayload) {
   const next =
     payload.status === "in_league"
       ? "We will email you the venue, the format, and your fixtures."
-      : "The five league places are taken for now. We will email you if a place frees up.";
+      : "The league is full for now. We will email you if a place frees up.";
   return {
     to: payload.captainEmail,
     subject: `PlayVejora: ${payload.teamName} is ${place}`,

@@ -33,7 +33,7 @@ npm run deploy
 
 The live Worker is `https://playvejora.playvejora.workers.dev`. Confirm a release with `/version.info`, which returns the name and version from `package.json` with no caching.
 
-Schema changes still need `npm run cf:migrate` before the code that uses them ships. Migration `0003` adds competitions and public team ids.
+Schema changes still need `npm run cf:migrate` before the code that uses them ships. Migration `0003` adds competitions and public team ids. `0004` adds listed competitions. `0005` adds match results and drops the unused leaderboard table.
 
 ## Domain
 

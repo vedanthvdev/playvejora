@@ -1,16 +1,32 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { catalogueLabel } from "@/lib/catalogue";
 import { site } from "@/lib/site-copy";
+import {
+  citiesForSport,
+  sportsOf,
+  type Competition,
+} from "@/lib/competitions";
 import { registerTeamAction } from "./actions";
 
 type Props = {
   waiverText: string;
+  competitions: Competition[];
 };
 
 const STEPS = ["Team", "Players", "Waiver", "Done"] as const;
 
-export function RegisterWizard({ waiverText }: Props) {
+export function RegisterWizard({ waiverText, competitions }: Props) {
+  const sports = sportsOf(competitions);
+  const [sport, setSport] = useState(sports.length === 1 ? sports[0] : "");
+  const cities = citiesForSport(competitions, sport);
+  const [city, setCity] = useState(cities.length === 1 ? cities[0] : "");
+  const chosen = competitions.find(
+    (row) => row.sport === sport && row.city === city,
+  );
+  const needsChoice = sports.length > 1 || cities.length > 1;
+  const [picking, setPicking] = useState(needsChoice);
   const [step, setStep] = useState(0);
   const [teamName, setTeamName] = useState("");
   const [company, setCompany] = useState("");
@@ -38,6 +54,7 @@ export function RegisterWizard({ waiverText }: Props) {
       captainEmail,
       playerNames: players,
       waiverAccepted,
+      competitionPublicId: chosen?.publicId,
     });
     setBusy(false);
     if (!result.ok) {
@@ -49,8 +66,86 @@ export function RegisterWizard({ waiverText }: Props) {
     setStep(3);
   }
 
+  if (competitions.length === 0) {
+    return (
+      <div className="panel">
+        <p>No leagues are open for registration right now.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
+      {picking ? (
+        <div className="panel">
+          <form
+            className="form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!chosen) {
+                setError("Pick a sport and city that are open.");
+                return;
+              }
+              setError("");
+              setPicking(false);
+            }}
+          >
+            {sports.length > 1 ? (
+              <>
+                <label htmlFor="sport">Sport</label>
+                <select
+                  id="sport"
+                  value={sport}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    setSport(next);
+                    const nextCities = citiesForSport(competitions, next);
+                    setCity(nextCities.length === 1 ? nextCities[0] : "");
+                  }}
+                  required
+                >
+                  <option value="">Choose a sport</option>
+                  {sports.map((value) => (
+                    <option key={value} value={value}>
+                      {catalogueLabel(value)}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : null}
+            {sport && cities.length > 1 ? (
+              <>
+                <label htmlFor="city">City</label>
+                <select
+                  id="city"
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  required
+                >
+                  <option value="">Choose a city</option>
+                  {cities.map((value) => (
+                    <option key={value} value={value}>
+                      {catalogueLabel(value)}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : null}
+            {error ? <p className="error">{error}</p> : null}
+            <div className="form-actions">
+              <button className="btn btn-solid" type="submit">
+                Continue
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : (
+        <>
+      {chosen ? (
+        <p className="competition-choice" aria-label="Selected competition">
+          {catalogueLabel(chosen.sport)} · {catalogueLabel(chosen.city)}
+        </p>
+      ) : null}
       <ol className="progress">
         {STEPS.map((label, index) => (
           <li
@@ -225,7 +320,7 @@ export function RegisterWizard({ waiverText }: Props) {
         {step === 3 && outcome === "in_league" ? (
           <div className="outcome">
             <span className="badge-xl in">You are in the league.</span>
-            <h2>{teamName} has a place in season one.</h2>
+            <h2>{teamName} has a place in this league.</h2>
             <p>
               Organizers will email {captainEmail} with the venue, the format, and
               your fixtures. Your reference is {publicId}.
@@ -238,7 +333,7 @@ export function RegisterWizard({ waiverText }: Props) {
             <span className="badge-xl wait">You are on the waitlist.</span>
             <h2>{teamName} is in line for the next opening.</h2>
             <p>
-              The five league places are taken. Organizers will email{" "}
+              The league teams allowed are taken. Organizers will email{" "}
               {captainEmail} if a place frees up. Your reference is {publicId}.
             </p>
           </div>
@@ -251,6 +346,8 @@ export function RegisterWizard({ waiverText }: Props) {
           </p>
         ) : null}
       </div>
+        </>
+      )}
     </div>
   );
 }

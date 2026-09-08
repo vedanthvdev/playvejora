@@ -2,27 +2,27 @@ export const site = {
   name: "PlayVejora",
   wordmark: { lead: "Play", accent: "Vejora" },
   city: "Edinburgh",
-  tagline: "After-work football for company sides.",
+  tagline: "After-work leagues for company sides.",
   email: "playvejora@gmail.com",
   nav: [
     { href: "/", label: "Home" },
     { href: "/how-it-works", label: "How it works" },
     { href: "/venue", label: "Venue & rules" },
+    { href: "/stats", label: "Stats" },
     { href: "/origin", label: "Origin" },
-    { href: "/register", label: "Register" },
   ],
 };
 
 export const home = {
-  kicker: "After-work football · Edinburgh",
-  title: "Finish work. Play football. Stay for the chat.",
-  lede: "PlayVejora is a company-first league in Edinburgh. One captain registers the whole side. The first five teams are in; everyone after joins the waitlist.",
-  cta: "Register a team",
+  kicker: "After-work leagues",
+  title: "Finish work. Play. Stay for the chat.",
+  lede: "PlayVejora runs company-first after-work leagues. Captains register a whole side. What is open — sport, city, and how many teams are allowed — is listed on the register page.",
   secondaryCta: "See how it works",
+  statsCta: "See stats",
   stats: [
-    { term: "Season one", detail: "Five teams in the opening Edinburgh league." },
     { term: "Who plays", detail: "Workplace sides, plus friends and mixed teams." },
-    { term: "Kick-off", detail: "Evenings after work. Venue confirmed soon." },
+    { term: "How you join", detail: "One captain registers the team. No player logins." },
+    { term: "Teams allowed", detail: "Each league has a team cap, then a waitlist." },
   ],
   steps: [
     {
@@ -30,26 +30,22 @@ export const home = {
       body: "One person enters the team, the company, and the players. Nobody creates an account.",
     },
     {
-      title: "Five in, then a waitlist",
-      body: "The first five complete Edinburgh teams take the league places. Later teams stay in line for the next opening.",
+      title: "A cap, then a waitlist",
+      body: "Each open league allows a fixed number of teams. Later teams stay in line for the next opening.",
     },
     {
       title: "We confirm the details",
       body: "Organizers come back to the captain with the venue, the format, and the fixtures.",
     },
   ],
-  closing: {
-    title: "Got a side at work?",
-    body: "Registration takes a few minutes. You need a team name, a contact email, and the players you expect to turn up.",
-  },
 };
 
 export const howItWorks = {
   title: "How it works",
-  lede: "Four short steps to get a workplace team into the opening Edinburgh season.",
+  lede: "Four short steps for a workplace team to join an open PlayVejora league.",
   points: [
     "A captain registers the whole team. Players do not create logins.",
-    "The first five complete Edinburgh teams are in the league. Further teams go on the waitlist.",
+    "Each open league has a cap. Further teams go on the waitlist.",
     "Payment is not collected on this site yet.",
     "Company sides are the aim. A friends or mixed side can still register.",
   ],
@@ -79,28 +75,35 @@ export const howItWorks = {
 
 export const venue = {
   title: "Venue, rules, and safety",
-  lede: "Everything settled so far about where we play and how we play.",
-  cityLine: "The first league is in Edinburgh.",
-  venueLine: "The pitch is to be confirmed. We will not invent an address.",
+  lede: "How we play. Venues and formats are confirmed with captains for each league.",
+  cityLine:
+    "Each league has its own city. Captains pick it on the register page when more than one is open.",
+  venueLine: "The venue is to be confirmed with captains. We will not invent an address.",
   formatLine:
-    "Match format is not fixed yet, so squad sizes stay open and the rules below stay general.",
+    "Match format can differ by sport. Squad sizes stay open until organizers confirm the details.",
   rules: [
     "Play fair. Respect the referee, the other side, and the venue staff.",
-    "No dangerous play. Studs-up challenges, violent conduct, and abuse mean a sending-off.",
+    "No dangerous play. Violent conduct and abuse mean a sending-off.",
     "Arrive ready to start. Captains are responsible for the players they list.",
     "If you are injured, stop playing. Tell a teammate and use the first aid at the venue.",
-    "Alcohol and smoking stay off the pitch.",
+    "Alcohol and smoking stay off the playing area.",
   ],
   safety: {
     title: "Safety and the waiver",
-    body: "Football carries a risk of injury. The captain accepts the waiver on behalf of the listed team when they register. The current waiver text is a placeholder and will be replaced before the season starts.",
+    body: "Sport carries a risk of injury. The captain accepts the waiver on behalf of the listed team when they register. The current waiver text is a placeholder and will be replaced before a season starts.",
   },
+};
+
+export const stats = {
+  title: "Stats",
+  lede: "Standings for each listed sport. Pick a sport, then optionally a city.",
+  empty: "Results appear here once a season has scores to publish.",
 };
 
 export const origin = {
   kicker: "How it started",
   title: "Two colleagues, one idea after work.",
-  lede: "PlayVejora began with two friends who worked at the same company and wanted somewhere other workplace sides could meet, play football, and stay for the chat.",
+  lede: "PlayVejora began with two friends who worked at the same company and wanted somewhere other workplace sides could meet, play, and stay for the chat.",
   story: [
     {
       title: "It started at work",
@@ -108,20 +111,16 @@ export const origin = {
     },
     {
       title: "The point is the people",
-      body: "The league exists so teams can socialise as much as they compete. Finish work, play football, then talk about something other than tickets.",
+      body: "The league exists so teams can socialise as much as they compete. Finish work, play, then talk about something other than tickets.",
     },
     {
-      title: "Edinburgh first",
-      body: "Season one stays in one city so the format can settle. More cities can follow later without changing why the idea exists.",
+      title: "One city first",
+      body: "The first season started in one city so the format could settle. More cities and sports can follow without changing why the idea exists.",
     },
   ],
-  closing: {
-    title: "Bring a side from your office",
-    body: "If that origin sounds like your workplace, a captain can register the whole team in a few minutes.",
-  },
 };
 
 export const footer = {
-  note: "PlayVejora · Edinburgh · pre-launch",
+  note: "PlayVejora · pre-launch",
   contactLabel: "Email the organizers",
 };

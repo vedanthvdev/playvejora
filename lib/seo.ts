@@ -1,7 +1,7 @@
 import { site } from "@/lib/site-copy";
 
 export const defaultDescription =
-  "PlayVejora is a company-first after-work football league in Edinburgh. A captain registers the whole team. The first five sides are in; later teams join the waitlist.";
+  "PlayVejora runs company-first after-work leagues. A captain registers the whole team. Each league has a set number of places, then a waitlist.";
 
 export const PRODUCTION_ORIGIN = "https://playvejora.dpdns.org";
 
@@ -23,7 +23,6 @@ export function sportsClubJsonLd() {
     "@context": "https://schema.org",
     "@type": "SportsClub",
     name: site.name,
-    sport: "Association football",
     url: siteUrl(),
     email: site.email,
     description: defaultDescription,

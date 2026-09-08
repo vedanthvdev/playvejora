@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ADMIN_COOKIE } from "@/lib/admin-auth";
 import { teamsForAdmin } from "@/lib/admin-data";
 import { listCompetitions } from "@/lib/competitions";
+import { catalogueLabel } from "@/lib/catalogue";
 import type { TeamStatus } from "@/lib/registration";
 
 function unique(values: string[]): string[] {
@@ -49,7 +50,7 @@ export default async function AdminPage({
             <option value="">All cities</option>
             {cities.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {catalogueLabel(value)}
               </option>
             ))}
           </select>
@@ -60,15 +61,15 @@ export default async function AdminPage({
             <option value="">All sports</option>
             {sports.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {catalogueLabel(value)}
               </option>
             ))}
           </select>
         </label>
         <label htmlFor="status">
-          Place
+          Status
           <select id="status" name="status" defaultValue={status}>
-            <option value="">All places</option>
+            <option value="">All statuses</option>
             <option value="in_league">In league</option>
             <option value="waitlist">Waitlist</option>
           </select>
@@ -79,7 +80,7 @@ export default async function AdminPage({
       </form>
 
       <div className="summary-row">
-        <span className="chip">{inLeague} of 5 league places in this view</span>
+        <span className="chip">{inLeague} in-league teams in this view</span>
         <span className="chip">{waitlisted} on the waitlist in this view</span>
       </div>
 
@@ -109,14 +110,16 @@ export default async function AdminPage({
                 <tr key={team.id}>
                   <td className="mono">{team.publicId}</td>
                   <td className="strong">{team.teamName}</td>
-                  <td>{team.city}</td>
-                  <td>{team.sport}</td>
+                  <td>{catalogueLabel(team.city)}</td>
+                  <td>{catalogueLabel(team.sport)}</td>
                   <td>
                     {team.company ||
                       (team.friendsOrMixed ? "Friends / mixed" : "—")}
                   </td>
                   <td>{team.captainEmail}</td>
-                  <td>{team.playerNames.join(", ")}</td>
+                  <td className="clamp" title={team.playerNames.join(", ")}>
+                    {team.playerNames.length} · {team.playerNames.join(", ")}
+                  </td>
                   <td>{team.waiverAcceptedAt ? "Accepted" : "—"}</td>
                   <td>
                     <span
@@ -129,7 +132,9 @@ export default async function AdminPage({
                   </td>
                   <td className="row-actions">
                     <Link href={`/admin/${team.id}`}>Edit</Link>
-                    <Link href={`/admin/${team.id}/delete`}>Delete</Link>
+                    <Link className="destructive" href={`/admin/${team.id}/delete`}>
+                      Delete
+                    </Link>
                   </td>
                 </tr>
               ))}

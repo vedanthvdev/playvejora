@@ -33,8 +33,11 @@ export default function RootLayout({
 }>) {
   const structuredData = JSON.stringify(sportsClubJsonLd());
 
+  // Browser extensions add their own attributes to <html> before React
+  // hydrates, which React reports as a mismatch. The suppression is one level
+  // deep, so real mismatches inside the app are still reported.
   return (
-    <html lang="en-GB">
+    <html lang="en-GB" suppressHydrationWarning>
       <body>
         <script
           type="application/ld+json"

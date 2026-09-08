@@ -23,9 +23,15 @@ describe("admin chrome", () => {
     expect(screen.queryByRole("link", { name: "Venue & rules" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Origin" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Register" })).toBeNull();
-    expect(
-      screen.getByRole("button", { name: "Log out" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Team intake" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Football" })).toHaveAttribute(
+      "href",
+      "/admin/sports/football",
+    );
+    expect(screen.getByRole("link", { name: "Volleyball" })).toHaveAttribute(
+      "href",
+      "/admin/sports/volleyball",
+    );
   });
 
   it("hides log out on the login page", () => {

@@ -1,11 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { footer, site } from "@/lib/site-copy";
-
-const registerLink = site.nav.find((item) => item.href === "/register") ?? {
-  href: "/register",
-  label: "Register",
-};
 
 export function PublicChrome({ children }: { children: ReactNode }) {
   return (
@@ -20,16 +17,14 @@ export function PublicChrome({ children }: { children: ReactNode }) {
             </span>
           </Link>
           <nav className="nav" aria-label="Primary">
-            {site.nav
-              .filter((item) => item.href !== registerLink.href)
-              .map((item) => (
-                <Link key={item.href} href={item.href}>
-                  {item.label}
-                </Link>
-              ))}
+            {site.nav.map((item) => (
+              <Link key={item.href} href={item.href}>
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          <Link className="nav-cta" href={registerLink.href}>
-            {registerLink.label}
+          <Link className="nav-cta" href="/register">
+            Register
           </Link>
         </div>
       </header>
@@ -37,7 +32,6 @@ export function PublicChrome({ children }: { children: ReactNode }) {
       <footer className="site-footer">
         <div className="wrap footer-inner">
           <span>{footer.note}</span>
-          <Link href="/origin">Origin</Link>
           <a href={`mailto:${site.email}`}>{site.email}</a>
           <span>{site.tagline}</span>
         </div>

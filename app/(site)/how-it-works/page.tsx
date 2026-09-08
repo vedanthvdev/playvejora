@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { home, howItWorks } from "@/lib/site-copy";
+import { howItWorks } from "@/lib/site-copy";
 
 export const metadata: Metadata = {
   title: "How it works",
@@ -50,9 +50,9 @@ export default function HowItWorksPage() {
       <section className="band bleed">
         <div className="wrap band-inner">
           <h2>Ready when you are</h2>
-          <p>{home.closing.body}</p>
+          <p>{howItWorks.notes.body}</p>
           <Link className="btn btn-primary" href="/register">
-            {home.cta}
+            Register a team
           </Link>
         </div>
       </section>
