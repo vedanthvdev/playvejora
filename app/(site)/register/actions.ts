@@ -1,7 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
-import { submitTeam, type SubmitResult, type TeamInput } from "@/lib/registration";
+import { submitTeamAndNotify } from "@/lib/notify";
+import { type SubmitResult, type TeamInput } from "@/lib/registration";
 import {
   REGISTER_POLICY,
   clientIp,
@@ -23,5 +24,5 @@ export async function registerTeamAction(input: TeamInput): Promise<SubmitResult
       )}, or email the organizers.`,
     };
   }
-  return submitTeam(input);
+  return submitTeamAndNotify(input);
 }
