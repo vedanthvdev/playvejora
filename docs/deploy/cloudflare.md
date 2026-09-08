@@ -64,7 +64,7 @@ Put `ADMIN_PASSWORD` in `.dev.vars` (copy `.dev.vars.example`). The Workers runt
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
-| `ADMIN_PASSWORD` | `wrangler secret` / `.dev.vars` | Organizer login. Required. |
+| `ADMIN_PASSWORD` | `wrangler secret` / `.dev.vars` | Shared organizer login. Required. Rotate with `npx wrangler secret put ADMIN_PASSWORD`. There is no reset UI. |
 | `SITE_URL` | `vars` in `wrangler.jsonc` | Canonical URLs, Open Graph, sitemap. |
 | `DB` | `d1_databases` binding | The D1 database. |
 
@@ -80,3 +80,5 @@ npx wrangler d1 export playvejora --remote --output backup.sql
 ```
 
 D1 keeps point-in-time recovery for the last 30 days on the free plan, but take an export before anything destructive.
+
+`teams` is the only table worth backing up. `admin_sessions` and `rate_limit_hits` are operational: clearing them logs organizers out and forgives current limits, and both prune themselves as they are used.

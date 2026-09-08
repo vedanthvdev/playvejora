@@ -12,7 +12,8 @@ Do not reverse these v1 rules when extending: Edinburgh-only public UI, no parti
 - **Intake fields:** extend `TeamInput`, add a migration under `migrations/`, and update the insert in `lib/registration.ts`. D1 has no interactive transactions, so anything that depends on current rows must be decided inside one statement, the way the league cap is.
 - **Data access:** everything goes through `getDatabase`. Tests inject a SQLite-backed stand-in with `useDatabase`, and it loads the real migrations, so an unmigrated schema change fails the suite.
 - **City:** each row already has `city` defaulting to `edinburgh`. More cities should filter and cap by city. Per-city versus shared waitlist is still to decide.
-- **Admin:** reuse `teamsForAdmin` and the cookie in `lib/admin-auth.ts`. Do not list PII on unauthenticated routes.
+- **Admin:** reuse `teamsForAdmin` and the cookie in `lib/admin-auth.ts`. A login inserts a random token into `admin_sessions` and the cookie carries only that token, so sessions expire after twelve hours and logout ends them. Organizer pages use `AdminChrome`, not the public nav or Origin footer. Edits go through `updateTeam` with bound parameters. Deleting a registration asks for `ADMIN_PASSWORD` again and does not end other sessions. Do not list PII on unauthenticated routes.
+- **Abuse limits:** any new unauthenticated write or credential check should take a bucket through `consumeRateLimit` in `lib/rate-limit.ts` before it touches the database, keyed by `clientIp`. Policies live beside it rather than at the call site.
 
 ## Deferred features (do not build in v1)
 

@@ -24,7 +24,12 @@ async function LoginForm({
       </div>
       <div className="panel">
         <form className="form" action={loginAdminAction}>
-          {params.error ? (
+          {params.error === "rate" ? (
+            <p className="error">
+              Too many attempts from this connection. Wait a few minutes and try
+              again.
+            </p>
+          ) : params.error ? (
             <p className="error">That password did not match.</p>
           ) : null}
           <label htmlFor="password">Password</label>
