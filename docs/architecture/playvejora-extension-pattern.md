@@ -1,6 +1,6 @@
 # PlayVejora extension pattern
 
-v1 is one Next.js App Router app. Public routes have no login. Captains register through `registerTeamAction` → `submitTeam` in `lib/registration.ts`. Intake is SQLite at `data/playvejora.sqlite`. Organizers reach `/admin` only after a shared `ADMIN_PASSWORD` cookie session.
+v1 is one Next.js App Router app on Cloudflare Workers. Public routes have no login. Captains register through `registerTeamAction` → `submitTeam` in `lib/registration.ts`. Intake is a Cloudflare D1 database bound as `DB`, reached through `getDatabase` in `lib/db.ts`. Organizers reach `/admin` only after a shared `ADMIN_PASSWORD` cookie session.
 
 Do not reverse these v1 rules when extending: Edinburgh-only public UI, no participant accounts, no Stripe on the current path, waitlist after five in-league Edinburgh rows, admin not in public nav.
 
@@ -8,8 +8,9 @@ Do not reverse these v1 rules when extending: Edinburgh-only public UI, no parti
 
 - **Routes:** add pages under `app/`. Keep `lib/site-copy.ts` nav limited to public destinations. Origin lives at `/origin` and is in the public nav.
 - **SEO:** default metadata, Open Graph, `app/sitemap.ts`, and `app/robots.ts` share `lib/seo.ts`. Set `SITE_URL` in production so canonical URLs and the sitemap are absolute. Do not index `/admin`.
-- **Hosted version:** `/version.info` reads `package.json` at request time. Do not cache it. Do not list it in the sitemap.
-- **Intake fields:** extend `TeamInput` and the `teams` table in `lib/registration.ts`. Run assignment inside the same write transaction.
+- **Hosted version:** `/version.info` reports the imported `package.json` version. Do not cache it. Do not list it in the sitemap.
+- **Intake fields:** extend `TeamInput`, add a migration under `migrations/`, and update the insert in `lib/registration.ts`. D1 has no interactive transactions, so anything that depends on current rows must be decided inside one statement, the way the league cap is.
+- **Data access:** everything goes through `getDatabase`. Tests inject a SQLite-backed stand-in with `useDatabase`, and it loads the real migrations, so an unmigrated schema change fails the suite.
 - **City:** each row already has `city` defaulting to `edinburgh`. More cities should filter and cap by city. Per-city versus shared waitlist is still to decide.
 - **Admin:** reuse `teamsForAdmin` and the cookie in `lib/admin-auth.ts`. Do not list PII on unauthenticated routes.
 
@@ -26,4 +27,4 @@ Do not reverse these v1 rules when extending: Edinburgh-only public UI, no parti
 
 ## Hosting
 
-`better-sqlite3` needs a Node server with a persistent disk. Do not deploy this store to a diskless serverless host without a follow-up database change.
+Cloudflare Workers with D1, deployed from `wrangler.jsonc` (see `docs/deploy/cloudflare.md`). The runtime has no filesystem and no process between requests, so nothing may read from disk at request time and no schema may be created on connect. Verify anything infrastructural with `npm run preview`, which runs the real Worker bundle on workerd, rather than `npm run dev`.

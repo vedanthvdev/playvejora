@@ -6,7 +6,7 @@ import { teamsForAdmin } from "@/lib/admin-data";
 export default async function AdminPage() {
   const jar = await cookies();
   const token = jar.get(ADMIN_COOKIE)?.value;
-  const teams = teamsForAdmin(token);
+  const teams = await teamsForAdmin(token);
   if (!teams) {
     redirect("/admin/login");
   }
