@@ -25,6 +25,7 @@ export function sportsClubJsonLd() {
     name: site.name,
     sport: "Association football",
     url: siteUrl(),
+    email: site.email,
     description: defaultDescription,
     areaServed: {
       "@type": "City",
@@ -34,6 +35,13 @@ export function sportsClubJsonLd() {
       "@type": "PostalAddress",
       addressLocality: site.city,
       addressCountry: "GB",
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "Team registration",
+      email: site.email,
+      areaServed: "GB",
+      availableLanguage: "English",
     },
   };
 }

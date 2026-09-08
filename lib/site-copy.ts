@@ -3,6 +3,7 @@ export const site = {
   wordmark: { lead: "Play", accent: "Vejora" },
   city: "Edinburgh",
   tagline: "After-work football for company sides.",
+  email: "playvejora@gmail.com",
   nav: [
     { href: "/", label: "Home" },
     { href: "/how-it-works", label: "How it works" },
@@ -122,4 +123,5 @@ export const origin = {
 
 export const footer = {
   note: "PlayVejora · Edinburgh · pre-launch",
+  contactLabel: "Email the organizers",
 };

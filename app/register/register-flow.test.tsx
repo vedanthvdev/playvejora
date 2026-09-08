@@ -2,6 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { site } from "@/lib/site-copy";
 import { RegisterWizard } from "./RegisterWizard";
 
 const registerTeamAction = vi.fn();
@@ -36,6 +37,10 @@ describe("RegisterWizard", () => {
     await user.click(screen.getByRole("button", { name: "Submit registration" }));
     expect(registerTeamAction).toHaveBeenCalled();
     expect(await screen.findByText("You are in the league.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: site.email })).toHaveAttribute(
+      "href",
+      `mailto:${site.email}`,
+    );
   });
 
   it("keeps submit disabled until the waiver is accepted", async () => {

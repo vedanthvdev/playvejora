@@ -72,4 +72,11 @@ describe("seo helpers", () => {
     expect(data.areaServed).toEqual({ "@type": "City", name: "Edinburgh" });
     expect(JSON.stringify(data)).not.toMatch(/streetAddress/);
   });
+
+  it("publishes one contact address for search results and the site", () => {
+    const data = sportsClubJsonLd();
+    expect(site.email).toBe("playvejora@gmail.com");
+    expect(data.email).toBe(site.email);
+    expect(data.contactPoint.email).toBe(site.email);
+  });
 });
