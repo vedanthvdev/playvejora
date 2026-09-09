@@ -29,3 +29,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           npm version patch -m "chore(release): v%s"
           git push --follow-tags origin HEAD:master
+
+  # Called rather than triggered by the tag above: GitHub does not start
+  # workflows for pushes made with the automatic GITHUB_TOKEN.
+  deploy:
+    needs: bump
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
