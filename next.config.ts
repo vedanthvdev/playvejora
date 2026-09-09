@@ -3,9 +3,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: process.cwd(),
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  agentRules: false,
 };
 
 // Gives `next dev` the same D1 binding the deployed Worker gets.

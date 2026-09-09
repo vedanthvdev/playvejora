@@ -177,7 +177,7 @@ describe("matches", () => {
 
   it("will not post a result for a waitlisted side", async () => {
     const home = await registerSide("Pitch FC", ["Alex"]);
-    const away = await registerSide("Dockside", ["Ros"]);
+    await registerSide("Dockside", ["Ros"]);
     await registerSide("Third", ["Kim"]);
     await registerSide("Fourth", ["Lee"]);
     await registerSide("Fifth", ["Mo"]);
