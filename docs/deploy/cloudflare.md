@@ -33,7 +33,7 @@ npm run deploy
 
 The live Worker is `https://playvejora.playvejora.workers.dev`. Confirm a release with `/version.info`, which returns the name and version from `package.json` with no caching.
 
-Schema changes still need `npm run cf:migrate` before the code that uses them ships. Migration `0003` adds competitions and public team ids. `0004` adds listed competitions. `0005` adds match results and drops the unused leaderboard table.
+Merges to `master` bump the patch version and tag `vX.Y.Z`. `.github/workflows/deploy.yml` then applies pending D1 migrations and runs `npm run deploy`. Add repository secrets `CLOUDFLARE_API_TOKEN` (Account → API Tokens, with Workers Scripts Edit and D1 Edit) and `CLOUDFLARE_ACCOUNT_ID`. Until those exist, run `npm run cf:migrate` and `npm run deploy` locally after a merge. A missed release can be shipped from Actions with **Run workflow**.
 
 ## Domain
 

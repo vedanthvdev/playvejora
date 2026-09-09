@@ -43,7 +43,7 @@ Visual language lives in [`docs/design/playvejora-design-system.md`](docs/design
 
 ## Deployment
 
-The site runs on Cloudflare Workers with registrations in D1, currently at `https://playvejora.playvejora.workers.dev`. [`docs/deploy/cloudflare.md`](docs/deploy/cloudflare.md) has the setup, why `playvejora.dpdns.org` cannot be attached yet, and the migration steps.
+The live site is `https://playvejora.playvejora.workers.dev`. [`docs/deploy/cloudflare.md`](docs/deploy/cloudflare.md) has the setup, why `playvejora.dpdns.org` cannot be attached yet, and the migration steps. Merges to `master` bump the patch version, tag it, apply pending D1 migrations, and deploy the Worker when `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set as GitHub secrets. Until those secrets exist, run `npm run cf:migrate` and `npm run deploy` locally after a merge.
 
 ```bash
 npm run preview   # build the Worker and run it locally in workerd with local D1
