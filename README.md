@@ -52,6 +52,8 @@ npm run deploy    # build and deploy to Cloudflare
 
 Because the Workers runtime has no filesystem and no long-lived process, two rules apply to anything added here: read nothing from disk at request time, and put every schema change in `migrations/` rather than creating tables on connect.
 
+`esbuild` is a direct dev dependency because `@opennextjs/cloudflare` imports it without declaring it. Removing it breaks `npm run deploy` and `npm run preview` on a clean install, even though `npm run build` still passes.
+
 ## Notes
 
 Replace the placeholder in `content/waiver.ts` before a real season. It is placeholder text, not legal advice.
