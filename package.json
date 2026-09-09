@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest run",
     "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "cf:migrate:local": "wrangler d1 migrations apply playvejora --local",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.6",
-    "next": "^15.5.25",
+    "next": "^16.3.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
@@ -34,7 +34,14 @@
     "jsdom": "^30.0.1",
     "typescript": "^6.0.3",
     "vitest": "^5.0.0",
-    "wrangler": "^4.129.1",
-    "better-sqlite3": "-"
+    "wrangler": "^4.130.0",
+    "better-sqlite3": "^13.0.3"
+  },
+  "allowScripts": {
+    "esbuild": false,
+    "better-sqlite3": false,
+    "fsevents": false,
+    "unrs-resolver": false,
+    "workerd": false
   }
 }
