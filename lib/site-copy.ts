@@ -16,7 +16,7 @@ export const site = {
 export const home = {
   kicker: "After-work leagues",
   title: "Finish work. Play. Stay for the chat.",
-  lede: "PlayVejora runs company-first after-work leagues. Captains register a whole side. What is open — sport, city, and how many teams are allowed — is listed on the register page.",
+  lede: "PlayVejora runs company-first after-work leagues. Captains register a whole side. The register page lists what is open, including sport, city, and how many teams are allowed.",
   secondaryCta: "See how it works",
   statsCta: "See stats",
   stats: [

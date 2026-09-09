@@ -59,7 +59,7 @@ describe("RegisterWizard", () => {
     await user.click(screen.getByRole("button", { name: "Submit registration" }));
     expect(registerTeamAction).toHaveBeenCalled();
     expect(await screen.findByText("You are in the league.")).toBeInTheDocument();
-    expect(screen.getByText(/Your reference is tm_aabbccddeeff0011/)).toBeInTheDocument();
+    expect(screen.getByText("tm_aabbccddeeff0011")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: site.email })).toHaveAttribute(
       "href",
       `mailto:${site.email}`,

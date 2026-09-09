@@ -7,8 +7,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: `${site.name} — ${site.tagline}`,
-    template: `%s — ${site.name}`,
+    default: `${site.name} · ${site.tagline}`,
+    template: `%s · ${site.name}`,
   },
   description: defaultDescription,
   alternates: { canonical: "/" },
@@ -16,12 +16,12 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_GB",
     siteName: site.name,
-    title: `${site.name} — ${site.tagline}`,
+    title: `${site.name} · ${site.tagline}`,
     description: defaultDescription,
   },
   twitter: {
     card: "summary",
-    title: `${site.name} — ${site.tagline}`,
+    title: `${site.name} · ${site.tagline}`,
     description: defaultDescription,
   },
 };

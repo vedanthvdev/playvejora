@@ -6,7 +6,10 @@ export default function HomePage() {
     <>
       <section className="hero bleed">
         <div className="wrap hero-inner">
-          <span className="kicker">{home.kicker}</span>
+          <span className="kicker">
+            <span className="kicker-dot" aria-hidden="true" />
+            {home.kicker}
+          </span>
           <h1>{home.title}</h1>
           <p>{home.lede}</p>
           <div className="hero-actions">

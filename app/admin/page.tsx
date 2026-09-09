@@ -114,13 +114,13 @@ export default async function AdminPage({
                   <td>{catalogueLabel(team.sport)}</td>
                   <td>
                     {team.company ||
-                      (team.friendsOrMixed ? "Friends / mixed" : "—")}
+                      (team.friendsOrMixed ? "Friends / mixed" : "Not given")}
                   </td>
                   <td>{team.captainEmail}</td>
                   <td className="clamp" title={team.playerNames.join(", ")}>
                     {team.playerNames.length} · {team.playerNames.join(", ")}
                   </td>
-                  <td>{team.waiverAcceptedAt ? "Accepted" : "—"}</td>
+                  <td>{team.waiverAcceptedAt ? "Accepted" : "Not accepted"}</td>
                   <td>
                     <span
                       className={

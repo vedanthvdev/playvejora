@@ -323,7 +323,11 @@ export function RegisterWizard({ waiverText, competitions }: Props) {
             <h2>{teamName} has a place in this league.</h2>
             <p>
               Organizers will email {captainEmail} with the venue, the format, and
-              your fixtures. Your reference is {publicId}.
+              your fixtures.
+            </p>
+            <p className="team-ref">
+              <span className="team-ref-label">Your reference</span>
+              <span className="team-ref-value">{publicId}</span>
             </p>
           </div>
         ) : null}
@@ -334,7 +338,11 @@ export function RegisterWizard({ waiverText, competitions }: Props) {
             <h2>{teamName} is in line for the next opening.</h2>
             <p>
               The league teams allowed are taken. Organizers will email{" "}
-              {captainEmail} if a place frees up. Your reference is {publicId}.
+              {captainEmail} if a place frees up.
+            </p>
+            <p className="team-ref">
+              <span className="team-ref-label">Your reference</span>
+              <span className="team-ref-value">{publicId}</span>
             </p>
           </div>
         ) : null}

@@ -7,6 +7,15 @@
   --pitch-500: #1f8a4c;
   --lime-400: #b6f36b;
   --lime-300: #c8f989;
+  --night-950: #02150d;
+  --pitch-line: rgba(182, 243, 107, 0.1);
+  --floodlight: rgba(182, 243, 107, 0.05);
+  --ink-invert: #eaf9ee;
+  --ink-invert-muted: rgba(234, 249, 238, 0.64);
+  --ink-invert-faint: rgba(234, 249, 238, 0.42);
+  --border-invert: rgba(234, 249, 238, 0.1);
+  --scoreboard-ink: var(--lime-400);
+  --warning-ink-invert: #f2c97a;
   --canvas: #f7f9f7;
   --surface: #ffffff;
   --surface-subtle: #f0f4f1;
@@ -45,6 +54,10 @@
   --control: 48px;
   --touch: 44px;
   --ease: ease-out;
+  --ease-reveal: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-hover: 120ms;
+  --motion-state: 180ms;
+  --motion-reveal: 240ms;
   --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif;
 }
@@ -141,10 +154,24 @@ a {
   padding-block: var(--rhythm-sm);
 }
 
-/* Adjacent constrained blocks share one gap instead of stacking two.
-   A block following a full-bleed band keeps its own top padding. */
-.main > .wrap + .wrap {
+/* A block owns the gap below it, never above, so two adjacent blocks show one
+   gap rather than stacking two. Only a block that sets padding-block may cancel
+   the next block's top padding. Matching any .wrap would leave no gap at all
+   after an unpadded one. A block following a full-bleed band keeps its own top
+   padding, because the band contributes no outside spacing. */
+.main > :is(.page-top, .section, .section-tight)
+  + :is(.page-top, .section, .section-tight) {
   padding-top: 0;
+}
+
+/* The same rule one level down. Sections nested inside a padded page block are
+   not siblings of .main, so without this a stats page pays every gap twice. */
+.page-top > :is(.section, .section-tight) {
+  padding-top: 0;
+}
+
+.page-top > :is(.section, .section-tight):last-child {
+  padding-bottom: 0;
 }
 
 /* ---------- header ---------- */
@@ -232,6 +259,15 @@ a {
   color: var(--ink);
 }
 
+/* The section you are in is marked by weight and a filled pill together with
+   aria-current, so it never rests on colour alone. This replaces repeating the
+   section name as a heading on the page itself. */
+.nav a.nav-on {
+  background: var(--success-bg);
+  color: var(--pitch-800);
+  font-weight: 650;
+}
+
 .nav-cta {
   flex-shrink: 0;
   display: inline-flex;
@@ -269,34 +305,49 @@ input:focus-visible {
 .hero {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 78% 12%, rgba(182, 243, 107, 0.18), transparent 34%),
-    linear-gradient(150deg, var(--pitch-800), var(--pitch-950) 72%);
-  color: #f2fbf4;
+  background-color: var(--night-950);
+  color: var(--ink-invert);
 }
 
+/* Floodlight pool and centre circle. Hard colour stops keep both flat shapes
+   rather than fades, so the band stays matte at any width. */
 .hero::before {
   content: "";
   position: absolute;
-  width: min(46vw, 520px);
-  height: min(46vw, 520px);
-  right: -6%;
-  bottom: -42%;
-  border: 2px solid rgba(182, 243, 107, 0.16);
-  border-radius: 50%;
+  inset: 0;
   pointer-events: none;
+  background-image:
+    radial-gradient(
+      circle at 82% 6%,
+      rgba(182, 243, 107, 0.05) 0 70px,
+      rgba(182, 243, 107, 0.038) 70px 120px,
+      rgba(182, 243, 107, 0.028) 120px 175px,
+      rgba(182, 243, 107, 0.02) 175px 235px,
+      transparent 235px
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 118px,
+      var(--pitch-line) 118px 120px,
+      transparent 120px
+    );
 }
 
+/* Mowing bands and the halfway line. */
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(
-    115deg,
-    rgba(255, 255, 255, 0.045) 0 2px,
-    transparent 2px 96px
-  );
   pointer-events: none;
+  background-image: linear-gradient(var(--pitch-line), var(--pitch-line)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.014) 0 6.25%,
+      transparent 6.25% 12.5%
+    );
+  background-size: 100% 1px, 100% 100%;
+  background-position: 0 50%, 0 0;
+  background-repeat: no-repeat, repeat;
 }
 
 .hero-inner {
@@ -306,8 +357,19 @@ input:focus-visible {
 }
 
 .hero .kicker {
-  background: rgba(182, 243, 107, 0.16);
-  color: var(--lime-400);
+  background: rgba(182, 243, 107, 0.12);
+  color: var(--scoreboard-ink);
+}
+
+/* Marks an open season. The dot is decoration, so the label carries the
+   meaning. It does not pulse: a looping decorative animation would run forever
+   without ever explaining a state. */
+.kicker-dot {
+  flex: none;
+  width: 0.44rem;
+  height: 0.44rem;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .hero h1 {
@@ -320,7 +382,7 @@ input:focus-visible {
   max-width: 52ch;
   font-size: clamp(1.0625rem, 1.5vw, 1.3rem);
   line-height: 1.5;
-  color: rgba(233, 248, 237, 0.84);
+  color: var(--ink-invert-muted);
 }
 
 .hero-actions {
@@ -336,6 +398,8 @@ input:focus-visible {
   gap: var(--space-2);
   align-self: start;
   justify-self: start;
+  max-width: 100%;
+  line-height: 1.35;
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   background: var(--success-bg);
@@ -384,9 +448,13 @@ input:focus-visible {
   cursor: pointer;
   text-decoration: none;
   transition:
-    background 120ms var(--ease),
-    border-color 120ms var(--ease),
-    transform 120ms var(--ease);
+    background var(--motion-hover) var(--ease),
+    border-color var(--motion-hover) var(--ease),
+    transform var(--motion-hover) var(--ease);
+}
+
+.btn:not([disabled]):hover {
+  transform: translateY(-1px);
 }
 
 .btn:active {
@@ -446,8 +514,9 @@ input:focus-visible {
 /* ---------- stats band ---------- */
 
 .stats-band {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--pitch-950);
+  border-bottom: 1px solid var(--pitch-800);
+  color: var(--ink-invert);
 }
 
 .stats {
@@ -458,7 +527,8 @@ input:focus-visible {
 
 .stats div {
   padding: clamp(var(--space-6), 3vw, var(--space-10)) var(--space-6);
-  border-left: 1px solid var(--border);
+  border-left: 1px solid var(--border-invert);
+  min-width: 0;
 }
 
 .stats div:first-child {
@@ -474,14 +544,14 @@ input:focus-visible {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--pitch-600);
+  color: var(--scoreboard-ink);
   font-weight: 680;
 }
 
 .stats dd {
   margin: var(--space-3) 0 0;
   font-size: 1.0625rem;
-  color: var(--ink-secondary);
+  color: var(--ink-invert-muted);
   line-height: 1.45;
 }
 
@@ -511,6 +581,16 @@ input:focus-visible {
   display: grid;
   gap: var(--space-3);
   align-content: start;
+  transition:
+    transform var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    box-shadow var(--motion-state) var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .card .step-no {
@@ -848,28 +928,83 @@ input[type="password"]:focus {
   display: grid;
   gap: var(--space-4);
   justify-items: start;
+  padding: clamp(var(--space-5), 2.5vw, var(--space-8));
+  border-radius: var(--radius-card);
+  background: var(--pitch-950);
+  color: var(--ink-invert);
+}
+
+/* A team name sets this heading, so it stays smaller than a page h2 and is
+   allowed to break rather than push the panel wider than the phone. */
+.outcome h2 {
+  font-size: clamp(1.35rem, 3.4vw, 1.75rem);
+  overflow-wrap: anywhere;
+}
+
+.outcome p {
+  color: var(--ink-invert-muted);
+}
+
+/* Reference is what a captain quotes back to organizers, so it leaves the
+   prose and gets its own labelled row. */
+.team-ref {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-invert);
+}
+
+.team-ref-label {
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-invert-faint);
+}
+
+.team-ref-value {
+  font-size: 1rem;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  color: var(--scoreboard-ink);
 }
 
 .badge-xl {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  max-width: 100%;
   padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-pill);
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2.6vw, 1rem);
   font-weight: 640;
+  line-height: 1.35;
 }
 
-.badge-xl.in,
 .pill.in {
   background: var(--success-bg);
   color: var(--success-ink);
 }
 
-.badge-xl.wait,
 .pill.wait {
   background: var(--warning-bg);
   color: var(--warning-ink);
+}
+
+/* Badges sit on the night outcome panel, so they invert rather than reuse the
+   light status backgrounds the admin pills use. */
+.badge-xl.in {
+  background: rgba(182, 243, 107, 0.14);
+  color: var(--scoreboard-ink);
+}
+
+.badge-xl.wait {
+  background: rgba(253, 243, 226, 0.14);
+  color: var(--warning-ink-invert);
 }
 
 /* ---------- table ---------- */
@@ -928,6 +1063,682 @@ tbody tr:last-child td {
 td.strong {
   color: var(--ink);
   font-weight: 570;
+}
+
+/* ---------- stats world (public results only) ---------- */
+
+/* Admin keeps plain tables. Only published results get the arcade treatment,
+   in a full-bleed band whose content still lines up with the rest of the page.
+   Every colour here is local to the band so nothing leaks into the site theme. */
+.m-world {
+  --m-sky: #5c94fc;
+  --m-sky-low: #8fc0ff;
+  --m-ink: #17110a;
+  --m-cream: #fff3d6;
+  --m-gold: #fbd000;
+  --m-gold-deep: #e39d25;
+  --m-brick: #c84c0c;
+  --m-brick-deep: #8a3208;
+  --m-grass: #00a800;
+  --m-grass-deep: #007000;
+  --m-display: "Arial Black", "Arial Bold", Gadget, var(--sans);
+  --m-outline: -2px -2px 0 var(--m-ink), 0 -2px 0 var(--m-ink), 2px -2px 0 var(--m-ink),
+    2px 0 0 var(--m-ink), 2px 2px 0 var(--m-ink), 0 2px 0 var(--m-ink), -2px 2px 0 var(--m-ink),
+    -2px 0 0 var(--m-ink);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-block: var(--rhythm) calc(var(--rhythm) + 72px);
+  background: linear-gradient(180deg, var(--m-sky), var(--m-sky-low));
+  color: var(--m-ink);
+}
+
+.m-sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.m-cloud {
+  position: absolute;
+  animation: m-drift 60s linear infinite alternate;
+}
+
+.m-hill {
+  position: absolute;
+  bottom: 72px;
+  border-top: 4px solid var(--m-grass-deep);
+  border-radius: 50% 50% 0 0;
+  background: var(--m-grass);
+}
+
+.m-hill-a {
+  left: 5%;
+  width: clamp(120px, 22vw, 260px);
+  height: clamp(60px, 11vw, 130px);
+}
+
+.m-hill-b {
+  right: 9%;
+  width: clamp(90px, 16vw, 190px);
+  height: clamp(45px, 8vw, 95px);
+}
+
+.m-head {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.m-eyebrow {
+  margin: 0;
+  color: var(--m-ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.66;
+}
+
+.m-title {
+  margin: 0;
+  color: var(--m-gold);
+  font-family: var(--m-display);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.04;
+  text-transform: uppercase;
+  text-shadow: var(--m-outline), 0 6px 0 rgba(0, 0, 0, 0.28);
+}
+
+/* Sub-pages, not an in-page toggle, so each view is linkable and the browser
+   back button moves between them. */
+.m-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.m-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 var(--space-5);
+  border: 3px solid var(--m-ink);
+  border-radius: 10px;
+  background: var(--m-cream);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+  color: var(--m-ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: transform var(--motion-hover) var(--ease);
+}
+
+.m-tab:hover {
+  transform: translate(-2px, -2px);
+}
+
+.m-tab-on {
+  background: var(--m-gold);
+  box-shadow: inset 0 -6px 0 var(--m-gold-deep), 4px 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+.m-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.m-filter label {
+  gap: var(--space-2);
+  color: var(--m-ink);
+  font-weight: 700;
+}
+
+.m-filter select {
+  border: 3px solid var(--m-ink);
+  border-radius: 8px;
+  background: var(--m-cream);
+  font-weight: 600;
+}
+
+.m-btn {
+  min-height: var(--control);
+  padding: 0 var(--space-5);
+  border: 3px solid var(--m-ink);
+  border-radius: 10px;
+  background: var(--m-cream);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+  color: var(--m-ink);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.m-lede,
+.m-empty {
+  margin-bottom: var(--space-8);
+  color: var(--m-ink);
+  font-weight: 600;
+  opacity: 0.78;
+}
+
+.m-empty {
+  text-align: center;
+  opacity: 0.66;
+}
+
+.m-group + .m-group {
+  margin-top: var(--space-10);
+}
+
+.m-group-title {
+  margin-bottom: var(--space-5);
+  color: var(--m-cream);
+  font-family: var(--m-display);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-shadow: var(--m-outline);
+}
+
+/* Sport picker on the stats landing. Same plate language as a results row, so
+   arriving at stats already looks like the boards behind it. */
+.m-picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-5);
+  width: 100%;
+  max-width: var(--content);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  list-style: none;
+}
+
+.m-picks li {
+  animation: m-pop-in 520ms cubic-bezier(0.24, 1.2, 0.4, 1) backwards;
+}
+
+.m-pick {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-6) var(--space-5);
+  border: 4px solid var(--m-ink);
+  border-radius: 14px;
+  background: var(--m-cream);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
+  color: var(--m-ink);
+  text-align: center;
+  text-decoration: none;
+  transition: transform var(--motion-hover) var(--ease);
+}
+
+.m-pick:hover {
+  transform: translate(-3px, -3px);
+}
+
+.m-pick:focus-visible {
+  outline: 4px solid var(--m-gold);
+  outline-offset: 3px;
+}
+
+.m-pick-art {
+  display: flex;
+  animation: m-bob 2.4s ease-in-out infinite;
+}
+
+.m-pick-name {
+  font-family: var(--m-display);
+  font-size: clamp(1.3rem, 3.4vw, 1.75rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.m-pick-go {
+  color: rgba(23, 17, 10, 0.62);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.m-list,
+.m-podium {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--content);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  list-style: none;
+}
+
+.m-podium {
+  gap: var(--space-6);
+}
+
+.m-row,
+.m-pod {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  animation: m-pop-in 520ms cubic-bezier(0.24, 1.2, 0.4, 1) backwards;
+}
+
+.m-pod {
+  --rise: 60px;
+  --travel: 130px;
+  position: relative;
+}
+
+/* Rank plate built like a question block: flat gold, hard outline, four
+   rivets. The numeral is text, so the order reads without the shape. */
+.m-block {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  border: 4px solid var(--m-ink);
+  border-radius: 8px;
+  background: var(--m-gold);
+  box-shadow: inset 0 -9px 0 var(--m-gold-deep), 4px 4px 0 rgba(0, 0, 0, 0.32);
+}
+
+.m-block-lead {
+  width: 84px;
+  height: 84px;
+}
+
+.m-block i {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--m-ink);
+}
+
+.m-block i:nth-child(1) {
+  top: 7px;
+  left: 7px;
+}
+
+.m-block i:nth-child(2) {
+  top: 7px;
+  right: 7px;
+}
+
+.m-block i:nth-child(3) {
+  bottom: 7px;
+  left: 7px;
+}
+
+.m-block i:nth-child(4) {
+  bottom: 7px;
+  right: 7px;
+}
+
+.m-block b {
+  color: var(--m-cream);
+  font-family: var(--m-display);
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: var(--m-outline);
+}
+
+.m-block-lead b {
+  font-size: 2.5rem;
+}
+
+.m-plate {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 84px;
+  padding-right: var(--space-5);
+  overflow: hidden;
+  border: 4px solid var(--m-ink);
+  border-radius: 14px;
+  background: var(--m-cream);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
+  transition: transform var(--motion-hover) var(--ease);
+}
+
+.m-stripe {
+  flex: none;
+  align-self: stretch;
+  width: 14px;
+  border-right: 4px solid var(--m-ink);
+  background: var(--m-brick);
+}
+
+.m-buddy {
+  flex: none;
+  display: flex;
+  margin-left: var(--space-2);
+}
+
+.m-ident {
+  display: grid;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.m-name {
+  font-family: var(--m-display);
+  font-size: clamp(1.05rem, 2.6vw, 1.4rem);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.12;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.m-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  color: rgba(23, 17, 10, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.m-meta abbr {
+  text-decoration: none;
+}
+
+.m-meta b {
+  color: var(--m-ink);
+}
+
+.m-score {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.m-coin {
+  display: flex;
+  animation: m-coin-spin 1.7s ease-in-out infinite;
+}
+
+.m-score strong {
+  color: var(--m-gold);
+  font-family: var(--m-display);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: var(--m-outline);
+}
+
+.m-unit {
+  color: rgba(23, 17, 10, 0.6);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.m-row:hover .m-block,
+.m-pod:hover .m-block {
+  animation: m-bump 440ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+.m-row:hover .m-plate,
+.m-pod:hover .m-plate {
+  transform: translate(-2px, -2px);
+}
+
+/* ---------- champion power-up ---------- */
+
+/* The block takes a hit, the mushroom rises out from behind it, runs across to
+   the plate and is absorbed; the plate then grows and throws confetti. The
+   mushroom is stacked behind the block inside a slot that sits above the plate,
+   which is what hides it until it clears the lid while still letting it pass
+   over the plate. Delays across these rules have to move together. */
+.m-pod-slot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex: none;
+}
+
+.m-mushroom {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 0;
+  margin-left: -31px;
+  display: flex;
+  animation: m-mushroom-run 1250ms cubic-bezier(0.4, 0.05, 0.35, 1) 900ms both;
+}
+
+.m-pod-lead .m-block {
+  animation: m-bump 460ms cubic-bezier(0.3, 1.4, 0.5, 1) 860ms backwards;
+}
+
+.m-pod-lead .m-plate {
+  animation: m-grow-plate 400ms var(--ease-reveal) 1900ms both;
+}
+
+.m-pod-lead .m-name {
+  animation: m-grow-name 400ms var(--ease-reveal) 1900ms both;
+}
+
+.m-pod-lead .m-score strong {
+  animation: m-grow-score 400ms var(--ease-reveal) 1900ms both;
+}
+
+.m-confetti {
+  position: absolute;
+  top: 50%;
+  left: 168px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.m-confetti i {
+  position: absolute;
+  width: 7px;
+  height: 10px;
+  border-radius: 1px;
+  animation: m-confetti-burst 880ms cubic-bezier(0.18, 0.7, 0.32, 1) 1900ms backwards;
+}
+
+.m-prize {
+  flex: none;
+  display: flex;
+  animation: m-prize-in 460ms cubic-bezier(0.3, 1.5, 0.45, 1) 1900ms backwards,
+    m-bob 2s ease-in-out 2.4s infinite;
+}
+
+/* ---------- ground ---------- */
+
+.m-ground {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 72px;
+  border-top: 16px solid var(--m-grass);
+  background-color: var(--m-brick);
+  background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0 44px,
+      var(--m-brick-deep) 44px 50px
+    ),
+    repeating-linear-gradient(180deg, transparent 0 28px, var(--m-brick-deep) 28px 34px);
+  box-shadow: inset 0 4px 0 var(--m-ink), 0 -16px 0 -12px var(--m-ink);
+}
+
+@keyframes m-pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.94);
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes m-bump {
+  0% {
+    transform: translateY(0);
+  }
+  26% {
+    transform: translateY(-18px);
+  }
+  56% {
+    transform: translateY(4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes m-coin-spin {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.18);
+  }
+}
+
+@keyframes m-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes m-drift {
+  from {
+    transform: translateX(-30px);
+  }
+  to {
+    transform: translateX(110px);
+  }
+}
+
+@keyframes m-mushroom-run {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  16% {
+    transform: translate(0, calc(var(--rise) * -1)) scale(1);
+  }
+  23% {
+    transform: translate(0, calc(var(--rise) * -0.8)) scale(1);
+  }
+  30% {
+    transform: translate(0, calc(var(--rise) * -1)) scale(1);
+  }
+  66% {
+    transform: translate(var(--travel), calc(var(--rise) * -0.52)) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(var(--travel), 0) scale(0.95);
+    opacity: 1;
+  }
+  92%,
+  100% {
+    transform: translate(var(--travel), 0) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes m-grow-plate {
+  from {
+    min-height: 84px;
+  }
+  to {
+    min-height: 116px;
+  }
+}
+
+@keyframes m-grow-name {
+  from {
+    font-size: clamp(1.05rem, 2.6vw, 1.4rem);
+  }
+  to {
+    font-size: clamp(1.45rem, 4.2vw, 2.15rem);
+  }
+}
+
+@keyframes m-grow-score {
+  from {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+  }
+  to {
+    font-size: clamp(2.2rem, 6.8vw, 3.1rem);
+  }
+}
+
+@keyframes m-confetti-burst {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0.3);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes m-prize-in {
+  0% {
+    transform: translateY(16px) scale(0.5);
+    opacity: 0;
+  }
+  62% {
+    transform: translateY(-5px) scale(1.14);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 .pill {
@@ -1053,6 +1864,55 @@ textarea {
   color: var(--ink-tertiary);
 }
 
+/* ---------- reveal ---------- */
+
+/* Only a starting frame is declared, so the finish is whatever the element
+   already computes to. Nothing is hidden by a base rule: a browser that runs
+   none of this still renders a finished page. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* The hero is above the fold, so it reveals on load. Each child starts a beat
+   after the one above it, which is what makes the band read top to bottom
+   instead of arriving all at once. */
+.hero-inner > * {
+  animation: rise-in var(--motion-reveal) var(--ease-reveal) backwards;
+}
+
+.hero-inner > :nth-child(1) {
+  animation-delay: 60ms;
+}
+
+.hero-inner > :nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.hero-inner > :nth-child(3) {
+  animation-delay: 180ms;
+}
+
+.hero-inner > :nth-child(4) {
+  animation-delay: 240ms;
+}
+
+/* Blocks below the fold reveal as they scroll in. A scroll-driven timeline
+   needs no observer and no JavaScript, and the @supports guard means browsers
+   without it show the content outright rather than never revealing it. */
+@supports (animation-timeline: view()) {
+  .stats div,
+  .section-head,
+  .card,
+  .table-wrap {
+    animation: rise-in var(--motion-reveal) var(--ease-reveal) both;
+    animation-timeline: view();
+    animation-range: entry 15% cover 28%;
+  }
+}
+
 @media (max-width: 959px) {
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1069,7 +1929,7 @@ textarea {
     align-items: start;
     padding: var(--space-5) 0;
     border-left: 0;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-invert);
   }
 
   .stats div:first-child {
@@ -1141,6 +2001,72 @@ textarea {
     gap: var(--space-2);
   }
 
+  /* Goals for and against are the first thing to go on a phone. Played, the
+     results, and the difference still explain the order on their own. */
+  .m-meta-extra {
+    display: none;
+  }
+
+  .m-block {
+    width: 48px;
+    height: 48px;
+    border-width: 3px;
+  }
+
+  .m-block-lead {
+    width: 58px;
+    height: 58px;
+  }
+
+  .m-block b {
+    font-size: 1.3rem;
+  }
+
+  .m-block-lead b {
+    font-size: 1.6rem;
+  }
+
+  .m-plate {
+    gap: var(--space-3);
+    min-height: 62px;
+    padding-right: var(--space-3);
+    border-width: 3px;
+  }
+
+  .m-stripe {
+    width: 8px;
+    border-right-width: 3px;
+  }
+
+  /* The avatar is the first thing to go: a name and a score need the width
+     more than an ornament does. */
+  .m-buddy {
+    display: none;
+  }
+
+  .m-pod {
+    --rise: 46px;
+    --travel: 78px;
+  }
+
+  .m-mushroom {
+    margin-left: -23px;
+  }
+
+  .m-mushroom svg {
+    width: 46px;
+    height: 46px;
+  }
+
+  .m-confetti {
+    left: 104px;
+  }
+
+  .m-prize svg {
+    width: 44px;
+    height: 44px;
+  }
+
   .footer-inner a {
     display: inline-flex;
     align-items: center;
@@ -1157,7 +2083,32 @@ textarea {
     scroll-behavior: auto !important;
   }
 
-  .btn:active {
+  .btn:hover,
+  .btn:active,
+  .card:hover,
+  .m-tab:hover,
+  .m-pick:hover,
+  .m-row:hover .m-plate,
+  .m-pod:hover .m-plate {
     transform: none;
+  }
+
+  /* The champion sequence is cancelled, so the plate is simply already at its
+     grown size and the mushroom stays parked behind the block. */
+  .m-pod-lead .m-plate {
+    min-height: 116px;
+  }
+
+  .m-pod-lead .m-name {
+    font-size: clamp(1.45rem, 4.2vw, 2.15rem);
+  }
+
+  .m-pod-lead .m-score strong {
+    font-size: clamp(2.2rem, 6.8vw, 3.1rem);
+  }
+
+  .m-mushroom,
+  .m-confetti {
+    display: none;
   }
 }

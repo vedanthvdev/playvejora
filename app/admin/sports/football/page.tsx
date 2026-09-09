@@ -62,7 +62,7 @@ export default async function FootballAdminPage() {
                   <td className="strong">{match.homeTeamName}</td>
                   <td>{match.awayTeamName}</td>
                   <td>
-                    {match.homeGoals}–{match.awayGoals}
+                    {match.homeGoals}-{match.awayGoals}
                   </td>
                   <td>{match.city}</td>
                   <td className="row-actions">
