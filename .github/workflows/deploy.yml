@@ -1,14 +1,12 @@
 name: deploy
 
-# A merge to master first runs `version`, which tags vX.Y.Z. This job then
-# applies pending D1 migrations and publishes the Worker so /version.info
-# matches the tag. workflow_dispatch covers a missed release or a first run
-# after the Cloudflare secrets are added.
+# GitHub ignores events created with the automatic GITHUB_TOKEN, so the tag the
+# `version` job pushes cannot start a run here. `version` calls this workflow
+# instead once the bump is tagged. workflow_dispatch ships whatever master
+# holds right now, which is also how a missed release is recovered.
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_call:
   workflow_dispatch:
 
 jobs:
@@ -19,6 +17,10 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # `version` has just pushed the bump, so deploy master rather than the
+          # merge commit that started the calling run.
+          ref: master
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -32,3 +34,5 @@ jobs:
       - run: npm ci
       - run: npx wrangler d1 migrations apply playvejora --remote
       - run: npm run deploy
+      - name: Report the deployed version
+        run: curl -sS https://playvejora.playvejora.workers.dev/version.info

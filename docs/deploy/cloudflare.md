@@ -33,7 +33,7 @@ npm run deploy
 
 The live Worker is `https://playvejora.playvejora.workers.dev`. Confirm a release with `/version.info`, which returns the name and version from `package.json` with no caching.
 
-Merges to `master` bump the patch version and tag `vX.Y.Z`. `.github/workflows/deploy.yml` then applies pending D1 migrations and runs `npm run deploy`. Add repository secrets `CLOUDFLARE_API_TOKEN` (Account → API Tokens, with Workers Scripts Edit and D1 Edit) and `CLOUDFLARE_ACCOUNT_ID`. Until those exist, run `npm run cf:migrate` and `npm run deploy` locally after a merge. A missed release can be shipped from Actions with **Run workflow**.
+Merges to `master` bump the patch version and tag `vX.Y.Z`, then the same run calls `.github/workflows/deploy.yml`, which applies pending D1 migrations and runs `npm run deploy`. The tag itself cannot start that job, because GitHub does not trigger workflows for pushes made with the automatic `GITHUB_TOKEN`. Add repository secrets `CLOUDFLARE_API_TOKEN` (Account → API Tokens, with Workers Scripts Edit and D1 Edit) and `CLOUDFLARE_ACCOUNT_ID`. Until those exist the deploy job fails on purpose, and a release can be shipped with `npm run cf:migrate` then `npm run deploy` locally. **Actions → deploy → Run workflow** ships whatever `master` holds, which is how a missed release is recovered.
 
 ## Domain
 

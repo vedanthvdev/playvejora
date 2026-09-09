@@ -9,18 +9,37 @@ function readWorkflow(name: string): string {
 }
 
 describe("release deploy", () => {
-  it("ships the Worker after a version tag, including pending D1 migrations", () => {
-    const deploy = readWorkflow("deploy.yml");
-    expect(deploy).toMatch(/on:\s*\n\s*push:\s*\n\s*tags:\s*\n\s*- ["']v\*/);
-    expect(deploy).toMatch(/workflow_dispatch/);
-    expect(deploy).toMatch(/d1 migrations apply playvejora --remote/);
-    expect(deploy).toMatch(/npm run deploy/);
+  const deploy = readWorkflow("deploy.yml");
+  const version = readWorkflow("version.yml");
+
+  it("applies pending D1 migrations before publishing the Worker", () => {
+    const migrate = deploy.indexOf("d1 migrations apply playvejora --remote");
+    const publish = deploy.indexOf("npm run deploy");
+    expect(migrate).toBeGreaterThan(-1);
+    expect(publish).toBeGreaterThan(migrate);
     expect(deploy).toMatch(/CLOUDFLARE_API_TOKEN/);
     expect(deploy).toMatch(/CLOUDFLARE_ACCOUNT_ID/);
   });
 
-  it("keeps the version job tagging so deploy has a v* event to follow", () => {
-    const version = readWorkflow("version.yml");
+  it("can be called by another workflow and run by hand", () => {
+    expect(deploy).toMatch(/workflow_call/);
+    expect(deploy).toMatch(/workflow_dispatch/);
+  });
+
+  // GitHub ignores events created with the automatic GITHUB_TOKEN, so the tag
+  // the version job pushes can never start a run of its own.
+  it("does not wait for a tag push that the version job cannot trigger", () => {
+    expect(deploy).not.toMatch(/^\s*tags:/m);
+  });
+
+  it("is called by the version job once the bump is tagged", () => {
     expect(version).toMatch(/git push --follow-tags origin HEAD:master/);
+    expect(version).toMatch(/needs: bump/);
+    expect(version).toMatch(/uses: \.\/\.github\/workflows\/deploy\.yml/);
+    expect(version).toMatch(/secrets: inherit/);
+  });
+
+  it("ships the commit the version job pushed, not the merge commit", () => {
+    expect(deploy).toMatch(/ref: master/);
   });
 });
