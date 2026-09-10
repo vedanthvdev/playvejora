@@ -12,9 +12,9 @@ export const dynamic = "force-dynamic";
 
 function setsLine(sets: { home: number; away: number }[] | null): string {
   if (!sets?.length) {
-    return "—";
+    return "No sets";
   }
-  return sets.map((set) => `${set.home}–${set.away}`).join(", ");
+  return sets.map((set) => `${set.home}-${set.away}`).join(", ");
 }
 
 export default async function VolleyballAdminPage() {
@@ -38,9 +38,9 @@ export default async function VolleyballAdminPage() {
         <span className="kicker">Organizers only</span>
         <h1>Volleyball results</h1>
         <p>
-          Pick two in-league sides and post each set, for example 25–20. The winner
-          is the side that takes more sets. That winner gets three points, the loser
-          none; a set-count draw is one point each.
+          Pick two in-league sides and post each set, for example 25-20. The winner
+          is the side that takes more sets. That winner gets three points and the
+          loser none. A set-count draw is one point each.
         </p>
       </div>
 

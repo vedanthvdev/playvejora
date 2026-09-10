@@ -2,9 +2,21 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { footer, site } from "@/lib/site-copy";
 
+/* Home matches only itself, everything else also claims its sub-pages, so a
+   sport table still shows Stats as the section you are in. */
+function isCurrent(pathname: string, href: string): boolean {
+  if (href === "/") {
+    return pathname === "/";
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function PublicChrome({ children }: { children: ReactNode }) {
+  const pathname = usePathname() ?? "/";
+
   return (
     <>
       <header className="site-header">
@@ -17,11 +29,19 @@ export function PublicChrome({ children }: { children: ReactNode }) {
             </span>
           </Link>
           <nav className="nav" aria-label="Primary">
-            {site.nav.map((item) => (
-              <Link key={item.href} href={item.href}>
-                {item.label}
-              </Link>
-            ))}
+            {site.nav.map((item) => {
+              const current = isCurrent(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  className={current ? "nav-on" : undefined}
+                  href={item.href}
+                  aria-current={current ? "page" : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
           <Link className="nav-cta" href="/register">
             Register
